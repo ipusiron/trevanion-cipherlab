@@ -163,14 +163,6 @@ tags: [trevanion, null-cipher, steganography, classical, visualization, educatio
 
 ---
 
-## 🔗 関連リソース
-
-### 自作ツール
-
-- [Hidden Message Challenge ― 分置式暗号の体験ツール](https://ipusiron.github.io/hidden-message-challenge/)
-
----
-
 ## 📁 ディレクトリー構成
 
 ```
@@ -194,6 +186,14 @@ trevanion-cipherlab/
 ├── script.js                 # メインJavaScript（61KB）
 └── style.css                 # メインCSS（26KB）
 ```
+
+---
+
+## 🔗 関連リソース
+
+### 自作ツール
+
+- [Hidden Message Challenge ― 分置式暗号の体験ツール](https://ipusiron.github.io/hidden-message-challenge/)
 
 ---
 
