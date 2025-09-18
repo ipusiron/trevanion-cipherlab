@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trevanion CipherLab</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Trevanion CipherLab</h1>
+    <p class="subtitle">トレヴァニオン暗号（Null暗号の一種）の可視化・学習ツール</p>
+  </header>
+
+  <main class="container">
+    <nav class="tabs" role="tablist" aria-label="Main Tabs">
+      <button class="tab-btn active" data-tab="basic" role="tab" aria-selected="true">トレヴァニオン暗号の基本</button>
+      <button class="tab-btn" data-tab="encrypt" role="tab" aria-selected="false">暗号化（隠蔽化） - 未実装</button>
+      <button class="tab-btn" data-tab="decrypt" role="tab" aria-selected="false">復号（可視化）</button>
+      <button class="tab-btn" data-tab="study" role="tab" aria-selected="false">Null暗号の座学</button>
+    </nav>
+
+    <!-- 基本 -->
+    <section id="basic" class="tab-panel active" role="tabpanel" aria-label="基本">
+      <h2>トレヴァニオン暗号の基本</h2>
+
+      <details class="accordion" open>
+        <summary>概要</summary>
+        <div class="accordion-content">
+          <p>
+            <strong>トレヴァニオン暗号</strong>は、<strong>Null暗号（冗字暗号）</strong>の一種です。<br>
+            表面的には自然な文章（カバーテキスト）ですが、<em>句読点の直後から数えて3文字目</em>を拾い集めると真のメッセージが現れます。
+          </p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>基本ルール</summary>
+        <div class="accordion-content">
+          <ul>
+            <li>句読点の集合（初期）：日本語「、。」／英語「, . ; : ! ? '」</li>
+            <li>数え方：句読点の<strong>直後から</strong>3文字目（空白を数えるかは設定で選択）</li>
+          </ul>
+        </div>
+      </details>
+      
+      <details class="accordion">
+        <summary>歴史的背景</summary>
+        <div class="accordion-content">
+          <p>
+            <strong>清教徒革命期</strong>、王党派の<strong>ジョン・トレヴァニオン卿</strong>は
+            コルチェスターの城に幽閉されました。友人R.T.から一通の手紙が届きました。
+          </p>
+          <p>
+            <em>"Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, ... Restinge your servant to command. R.T."</em>
+          </p>
+          <p>これは一見普通の慰めの手紙に見えますが、Null暗号が仕込まれていたのです。</p>
+          <p>
+            句読点の直後から3文字目を順に拾うと、<em>"panel at east end of chapel slides"</em>
+            （礼拝堂の東端のパネルがスライドする）という脱出の指示が現れ、
+            トレヴァニオンは祈りを装いながらこの隠し通路を発見し、脱出に成功しました。
+          </p>
+          <p>
+            後に<strong>コナン・ドイル</strong>の『グロリア・スコット号事件』でも
+            類似の暗号が登場し、この暗号方式が広く知られるようになりました。
+          </p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>関連情報</summary>
+        <div class="accordion-content">
+          <p>
+            Null暗号の詳細は<strong>座学</strong>タブを参照してください。
+          </p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 暗号化（隠蔽化） -->
+    <section id="encrypt" class="tab-panel" role="tabpanel" aria-label="暗号化（隠蔽化）">
+      <h2>暗号化</h2>
+
+      <!-- サブタブ -->
+      <nav class="sub-tabs" role="tablist" aria-label="Encrypt Sub Tabs">
+        <button class="sub-tab-btn active" data-subtab="generate-support" role="tab" aria-selected="true">生成支援</button>
+        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false">自動生成</button>
+      </nav>
+
+      <!-- 生成支援サブタブ -->
+      <div id="generate-support" class="sub-tab-panel active" role="tabpanel" aria-label="生成支援">
+        <h3>制約チェック＆ヒント</h3>
+        <p class="note">
+          自然な文章を自動生成するのは難度が高いため、ここでは
+          <strong>「カバーテキスト案」</strong>に対して
+          <strong>「各句読点のn文字目が満たすべき文字」</strong>を可視化し、不一致箇所を指摘します。
+        </p>
+
+        <div class="controls">
+          <label for="enc-plain">隠したいメッセージ（平文）</label>
+          <textarea id="enc-plain" rows="2" placeholder="例：HELLO または こんにちは"></textarea>
+
+          <div class="processing-target">
+            <label>処理対象文字列（アルファベットのみ）：</label>
+            <div id="enc-processing-text" class="processing-text-display"></div>
+          </div>
+
+          <label for="enc-cover">カバーテキスト案（自然文）</label>
+          <textarea id="enc-cover" rows="6" placeholder="ここに自然な文章を書いて、句読点（、。,.!?;:）の3文字後に平文の各文字が並ぶように調整します。"></textarea>
+
+          <div class="opts">
+            <label for="puncts-input">句読点セット：</label>
+            <input type="text" id="puncts-input" value="、。,.!?;:'" />
+            <label for="enc-offset">オフセットn：</label>
+            <input type="number" id="enc-offset" value="3" min="1" />
+            <label><input type="checkbox" id="count-spaces"> 空白も「文字数」に含める</label>
+            <button id="enc-check" class="primary">制約チェック</button>
+          </div>
+        </div>
+
+        <div id="enc-report" class="report" aria-live="polite"></div>
+        <div id="enc-preview" class="preview" aria-label="ハイライトプレビュー"></div>
+
+        <details class="tips">
+          <summary>文章調整のコツ（ヒント）</summary>
+          <ul>
+            <li>句読点の位置は「平文の文字境界」を作るスイッチ。位置を増減して、3文字目に欲しい文字が来るよう語順を調整。</li>
+            <li>助詞・副詞・接続詞でリズムを作り、必要な箇所に3文字の余白（例：「が」「やはり」「しかし」など）を挿入。</li>
+            <li>日本語のかな・漢字・英数の混在で微調整しやすい（1文字カウントでズレを吸収）。</li>
+            <li>どうしても無理な場合は、平文の文字集合をローマ字化／英字置換するなどの工夫も有効。</li>
+          </ul>
+        </details>
+      </div>
+
+      <!-- 自動生成サブタブ -->
+      <div id="auto-generate" class="sub-tab-panel" role="tabpanel" aria-label="自動生成">
+        <h3>自動生成</h3>
+        <p class="note">
+          平文を入力すると、トレヴァニオン暗号のカバーテキストを自動生成します。
+          複数の候補から選択できます。
+        </p>
+
+        <div class="controls">
+          <label for="auto-plain">隠したいメッセージ（平文）</label>
+          <textarea id="auto-plain" rows="2" placeholder="例：HELLO または SECRET"></textarea>
+
+          <div class="processing-target">
+            <label>処理対象文字列（アルファベットのみ）：</label>
+            <div id="auto-processing-text" class="processing-text-display"></div>
+          </div>
+
+          <div class="opts">
+            <label for="auto-puncts">句読点セット：</label>
+            <input type="text" id="auto-puncts" value="、。,.!?;:'" />
+            <label for="auto-offset">オフセットn：</label>
+            <input type="number" id="auto-offset" value="3" min="1" max="10" />
+            <label><input type="checkbox" id="auto-count-spaces"> 空白も「文字数」に含める</label>
+            <label for="auto-style">文体：</label>
+            <select id="auto-style">
+              <option value="formal">丁寧（formal）</option>
+              <option value="casual">カジュアル</option>
+              <option value="literary">文語調</option>
+            </select>
+            <button id="auto-generate-btn" class="primary">🤖 通常生成</button>
+          </div>
+        </div>
+
+        <!-- 完全一致探索機能 -->
+        <details class="perfect-search-section">
+          <summary>🎯 完全一致候補の探索機能</summary>
+          <div class="perfect-search-content">
+            <div class="warning-box">
+              <h4>⚠️ 使用前の注意事項</h4>
+              <ul>
+                <li><strong>無限ループの可能性</strong>：平文によっては完全一致候補が生成不可能な場合があります</li>
+                <li><strong>処理時間の不確定性</strong>：数秒から数分、場合によってはそれ以上かかる可能性があります</li>
+                <li><strong>メモリ使用量増加</strong>：大量の候補生成により一時的にメモリを消費します</li>
+                <li><strong>CPU負荷</strong>：連続生成によりデバイスの処理負荷が高くなります</li>
+                <li><strong>バッテリー消費</strong>：モバイルデバイスでのバッテリー消費が増加します</li>
+                <li><strong>安全装置</strong>：10万回試行後に自動停止します（設定変更可能）</li>
+              </ul>
+            </div>
+
+            <div class="perfect-search-controls">
+              <label for="target-perfect-count">目標完全一致数：<span class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数">❓</span></label>
+              <input type="number" id="target-perfect-count" value="2" min="1" max="10" />
+
+              <label for="max-attempts">最大試行回数：</label>
+              <input type="number" id="max-attempts" value="100000" min="1000" max="500000" step="10000" />
+
+              <div class="search-buttons">
+                <button id="start-perfect-search" class="primary">🎯 完全一致探索開始</button>
+                <button id="pause-perfect-search" class="secondary" style="display:none;">⏸️ 一時停止</button>
+                <button id="stop-perfect-search" class="secondary" style="display:none;">⏹️ 完全停止</button>
+              </div>
+            </div>
+
+            <div id="search-progress" class="search-progress" style="display:none;">
+              <div class="progress-header">
+                <h4>🔍 探索中...</h4>
+                <div class="progress-stats">
+                  <span id="attempts-count">試行回数: 0</span>
+                  <span id="perfect-found">完全一致: 0</span>
+                  <span id="search-time">経過時間: 00:00</span>
+                </div>
+              </div>
+              <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+                <div id="progress-percentage" class="progress-percentage">0%</div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <div id="auto-results" class="auto-results" style="display:none;">
+          <h4>生成結果</h4>
+          <div class="generation-info">
+            <span id="auto-info" class="generation-stats"></span>
+            <button id="auto-regenerate" class="secondary">🔄 再生成</button>
+          </div>
+          <div id="auto-candidates" class="candidates-list"></div>
+        </div>
+
+        <div class="note" style="margin-top: 20px;">
+          <strong>機能説明：</strong>
+          <ul>
+            <li>英語単語データベースに基づいて自動生成</li>
+            <li>各句読点のn文字目に平文の文字が配置されるように調整</li>
+            <li>生成されたテキストは「生成支援」タブで検証可能</li>
+            <li>現在は英語対応、日本語は今後対応予定</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 復号（可視化） -->
+    <section id="decrypt" class="tab-panel" role="tabpanel" aria-label="復号（可視化）">
+      <h2>復号（可視化）</h2>
+
+      <div class="controls">
+        <label for="dec-text">対象テキスト</label>
+        <textarea id="dec-text" rows="8" placeholder="ここにカバーテキスト（自然文）を貼り付け">Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, cannot much, I fear me, help you now. That I would saye to you, is this only: if ever I may be able to requite that I do owe you, stand not upon asking me. 'Tis not much that I can do: but what I can do, bee ye verie sure I wille. I knowe that, if dethe comes, if ordinary men fear it, it frights not you, accounting it for a high honour, to have such a rewarde of your loyalty. Pray yet that you may be spared this soe bitter, cup. I fear not that you will grudge any sufferings; only if bie submission you can turn them away, 'tis the part of a wise man. Tell me, an if you can, to do for you anythinge that you wolde have done. The general goes back on Wednesday. Restinge your servant to command. R.T.</textarea>
+
+        <div class="opts">
+          <label for="dec-puncts">句読点セット：</label>
+          <input type="text" id="dec-puncts" value="、。,.!?;:'" />
+          <label for="dec-offset">オフセットn（句読点の直後から何文字目を拾うか）：</label>
+          <input type="number" id="dec-offset" value="3" min="1" />
+          <label><input type="checkbox" id="dec-count-spaces"> 空白も「文字数」に含める</label>
+          <button id="dec-run" class="primary">ハイライト＆抽出</button>
+        </div>
+      </div>
+
+      <div class="vertical-layout">
+        <div>
+          <h3>ハイライト表示</h3>
+          <div id="dec-highlight" class="highlight-box"></div>
+        </div>
+        <div class="result-section">
+          <div class="result-header">
+            <h3>抽出結果</h3>
+            <button id="copy-result" class="copy-btn" title="結果をコピー">📋 コピー</button>
+          </div>
+          <div id="dec-result" class="result-box" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 座学 -->
+    <section id="study" class="tab-panel" role="tabpanel" aria-label="座学">
+      <h2>Null暗号の座学</h2>
+
+      <details class="accordion" open>
+        <summary>Null暗号（冗字暗号）の定義</summary>
+        <div class="accordion-content">
+          <p>
+            <strong>Null暗号（Null cipher）</strong> とは、自然文に見えるテキストから、
+            あらかじめ決められた規則で文字を抜き出すことで真のメッセージを得る暗号方式です。
+            日本語では <strong>冗字暗号</strong> や <strong>冗字サイファー</strong> とも呼ばれます。
+            一見して普通の文章に見えるため、暗号文だと気づかれにくく、検閲回避などに利用されました。
+          </p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Null暗号の仕組み</summary>
+        <div class="accordion-content">
+          <ul>
+            <li>少数の選ばれた単語や文字だけに注目し、それ以外は「冗字（null, dummy letters／捨て字）」として意味を持たない。</li>
+            <li>規則の例：
+              <ul>
+                <li>コンマの後の最初の文字を拾う</li>
+                <li>一段落内の5語目の後の4文字を拾う</li>
+                <li>新しい段落の直前の単語を拾う</li>
+              </ul>
+            </li>
+            <li>トレヴァニオン暗号では「<strong>句読点の直後から数えて3文字目</strong>」というルールを用いる。</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Null暗号の特徴</summary>
+        <div class="accordion-content">
+          <ul>
+            <li>転置や置換は行わず、文字は本文中にそのまま存在する。</li>
+            <li>自然な文章に溶け込ませるため、<strong>ステガノグラフィー（情報隠蔽）</strong>の性質を備える。</li>
+            <li>情報量は少なく効率は悪いが、暗号を使っていること自体を隠せる。</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Null暗号文の作り方（簡易版）</summary>
+        <div class="accordion-content">
+          <ol>
+            <li>紙を縦に二つ折り（や三つ折り）にする。</li>
+            <li>折り目に沿って縦にメッセージ（平文）を書く。</li>
+            <li>折り目を開き、その前後を冗字で埋めて自然な文章に仕立てる。</li>
+          </ol>
+          <p>→ 受け取った側は、折り目に沿って縦に読むことで平文を復元できる。</p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Null暗号文の識別のヒント</summary>
+        <div class="accordion-content">
+          <ul>
+            <li>不自然に冗長、または堅苦しい言葉遣いがある。</li>
+            <li>一定間隔や特定位置に意味のある文字列が現れる。</li>
+          </ul>
+          <p>→ こうした特徴がある文章はNull暗号文の可能性がある。</p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>Null暗号の歴史的背景と応用</summary>
+        <div class="accordion-content">
+          <ul>
+            <li>古くからスパイや囚人の密書で利用され、検閲を欺くために活用された。</li>
+            <li>現代では「隠しメッセージ」「ステガノグラフィー」の原型として扱われ、教育や歴史研究で取り上げられている。</li>
+            <li>Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer">
+      🔗 GitHubリポジトリはこちら（
+      <a href="https://github.com/ipusiron/trevanion-cipherlab" target="_blank" rel="noopener">ipusiron/trevanion-cipherlab</a>
+      ）
+    </div>
+  </footer>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
