@@ -1,3 +1,4 @@
+<!--
 ---
 title: Trevanion CipherLab
 category: classical-cryptography
@@ -5,6 +6,7 @@ difficulty: 1
 description: A visual, educational web app for the Trevanion Cipher (a classic Null cipher).
 tags: [trevanion, null-cipher, steganography, classical, visualization, education]
 ---
+-->
 
 # Trevanion CipherLab - トレヴァニオン暗号支援ツール
 
