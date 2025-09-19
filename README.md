@@ -16,7 +16,7 @@ tags: [trevanion, null-cipher, steganography, classical, visualization, educatio
 ![GitHub license](https://img.shields.io/github/license/ipusiron/trevanion-cipherlab)
 [![GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-blue?logo=github)](https://ipusiron.github.io/trevanion-cipherlab/)
 
-**Day068 - 生成AIで作るセキュリティツール100**
+**Day069 - 生成AIで作るセキュリティツール100**
 
 
 **Trevanion CipherLab**は、**トレヴァニオン暗号（Trevanion Cipher）** を可視化・学習するためのWebアプリです。
