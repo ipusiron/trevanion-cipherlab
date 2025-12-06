@@ -1,10 +1,37 @@
 <!--
 ---
-title: Trevanion CipherLab
-category: classical-cryptography
+id: day069
+slug: trevanion-cipherlab
+
+title: "Trevanion CipherLab"
+
+subtitle_ja: "トレヴァニオン暗号の可視化・学習ツール"
+subtitle_en: "Visual learning tool for Trevanion Cipher"
+
+description_ja: "トレヴァニオン暗号（Null暗号の一種）を可視化・学習するためのWebアプリ。復号（可視化）、暗号化支援（制約チェック）、自動生成（英語・日本語対応）、完全一致探索機能を提供。"
+description_en: "A visual, educational web app for the Trevanion Cipher (a classic Null cipher). Features decryption visualization, encryption assistance with constraint checking, auto-generation for English/Japanese, and perfect match search."
+
+category_ja:
+  - 古典暗号
+  - ステガノグラフィー
+category_en:
+  - Classical Cryptography
+  - Steganography
+
 difficulty: 1
-description: A visual, educational web app for the Trevanion Cipher (a classic Null cipher).
-tags: [trevanion, null-cipher, steganography, classical, visualization, education]
+
+tags:
+  - trevanion
+  - null-cipher
+  - steganography
+  - classical
+  - visualization
+  - education
+
+repo_url: "https://github.com/ipusiron/trevanion-cipherlab"
+demo_url: "https://ipusiron.github.io/trevanion-cipherlab/"
+
+hub: true
 ---
 -->
 
