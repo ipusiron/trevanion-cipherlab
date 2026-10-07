@@ -1098,3 +1098,14 @@ details.tips ul {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* 出典や但し書き */
+.accordion-content .note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--border);
+  background: var(--hl);
+  border-radius: 0 6px 6px 0;
+  font-size: 14px;
+  line-height: 1.8;
+}
