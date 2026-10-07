@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Trevanion CipherLab</title>
   <link rel="stylesheet" href="./style.css" />
@@ -15,7 +17,7 @@
   <main class="container">
     <nav class="tabs" role="tablist" aria-label="Main Tabs">
       <button class="tab-btn active" data-tab="basic" role="tab" aria-selected="true">トレヴァニオン暗号の基本</button>
-      <button class="tab-btn" data-tab="encrypt" role="tab" aria-selected="false">暗号化（隠蔽化） - 未実装</button>
+      <button class="tab-btn" data-tab="encrypt" role="tab" aria-selected="false">暗号化（隠蔽化）</button>
       <button class="tab-btn" data-tab="decrypt" role="tab" aria-selected="false">復号（可視化）</button>
       <button class="tab-btn" data-tab="study" role="tab" aria-selected="false">Null暗号の座学</button>
     </nav>
@@ -190,12 +192,12 @@
 
               <div class="search-buttons">
                 <button id="start-perfect-search" class="primary">🎯 完全一致探索開始</button>
-                <button id="pause-perfect-search" class="secondary" style="display:none;">⏸️ 一時停止</button>
-                <button id="stop-perfect-search" class="secondary" style="display:none;">⏹️ 完全停止</button>
+                <button id="pause-perfect-search" class="secondary" hidden>⏸️ 一時停止</button>
+                <button id="stop-perfect-search" class="secondary" hidden>⏹️ 完全停止</button>
               </div>
             </div>
 
-            <div id="search-progress" class="search-progress" style="display:none;">
+            <div id="search-progress" class="search-progress" hidden>
               <div class="progress-header">
                 <h4>🔍 探索中...</h4>
                 <div class="progress-stats">
@@ -212,7 +214,7 @@
           </div>
         </details>
 
-        <div id="auto-results" class="auto-results" style="display:none;">
+        <div id="auto-results" class="auto-results" hidden>
           <h4>生成結果</h4>
           <div class="generation-info">
             <span id="auto-info" class="generation-stats"></span>
@@ -221,7 +223,7 @@
           <div id="auto-candidates" class="candidates-list"></div>
         </div>
 
-        <div class="note" style="margin-top: 20px;">
+        <div class="note note-spaced">
           <strong>機能説明：</strong>
           <ul>
             <li>英語単語データベースに基づいて自動生成</li>
@@ -357,6 +359,7 @@
   <!-- トースト通知 -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
+  <script src="./js/trevanion-core.js"></script>
   <script src="./script.js"></script>
 </body>
 </html>

@@ -1039,3 +1039,12 @@ details.tips ul {
   .generation-info{flex-direction:column;align-items:stretch;gap:8px}
   .candidate-header{flex-direction:column;align-items:stretch;gap:8px}
 }
+
+/* 表示の出し入れは hidden 属性で行う（インラインの style 属性は CSP で止まるため） */
+[hidden] {
+  display: none !important;
+}
+
+.note-spaced {
+  margin-top: 20px;
+}
