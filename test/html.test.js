@@ -25,7 +25,8 @@ test('インラインの style 属性とイベントハンドラーがない', (
 
 test('スクリプトは計算部・画面の順に読み込む', () => {
   const srcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(srcs, ['./js/trevanion-core.js', './script.js']);
+  assert.deepEqual(srcs, ['./js/trevanion-words.js', './js/trevanion-core.js', './script.js']);
+  assert.equal(new Set(srcs).size, srcs.length, '同じスクリプトを2回読み込んでいる');
 });
 
 test('タブとパネルが id で結ばれ、キーボードで移動できる', () => {

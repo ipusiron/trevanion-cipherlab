@@ -1158,3 +1158,24 @@ details.tips ul {
     font-size: 13px;
   }
 }
+
+/* 分かち書きした結果 */
+.segmented {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: var(--hl);
+  border-left: 3px solid var(--accent-2);
+  border-radius: 0 6px 6px 0;
+  font-family: monospace;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.handoff {
+  margin: 10px 0 0;
+  font-size: 14px;
+}
+
+.handoff a {
+  color: var(--accent);
+}

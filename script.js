@@ -225,6 +225,8 @@ const decCountMode = document.getElementById('dec-count-mode');   // 何を1文�
 const decMode = document.getElementById('dec-mode');             // 句読点に当たったときの数え方
 const decSweep = document.getElementById('dec-sweep');           // 規則の総当たりボタン
 const decSweepResult = document.getElementById('dec-sweep-result'); // 総当たりの結果
+const decSegmented = document.getElementById('dec-segmented');   // 分かち書きした結果
+const decToFrequency = document.getElementById('dec-to-frequency'); // ほかのツールへの受け渡し
 const decRun = document.getElementById('dec-run');               // 実行ボタン
 const decResult = document.getElementById('dec-result');           // 結果表示エリア
 const decHighlight = document.getElementById('dec-highlight');     // ハイライト表示エリア
@@ -246,6 +248,23 @@ decRun?.addEventListener('click', () => {
 
   // 結果の表示
   decResult.textContent = message;                                    // 抽出されたメッセージ
+
+  // 空白が入らないので、辞書で区切り直して読みやすくする
+  const words = Core.segment(message);
+  if (words) {
+    decSegmented.textContent = words.join(' ');
+    decSegmented.hidden = false;
+  } else {
+    decSegmented.hidden = true;
+  }
+
+  // ほかのツールへ渡すリンク（URL のハッシュに載せる。サーバーへは送られない）
+  if (decToFrequency) {
+    const payload = (words ? words.join(' ') : message).slice(0, 2000);
+    decToFrequency.href = payload
+      ? `https://ipusiron.github.io/frequency-analyzer/#text=${encodeURIComponent(payload)}`
+      : 'https://ipusiron.github.io/frequency-analyzer/';
+  }
   decHighlight.innerHTML = renderHighlight(text, indices, puncts);    // ハイライト表示
 
   // 設定をLocalStorageに保存（次回起動時に復元するため）
