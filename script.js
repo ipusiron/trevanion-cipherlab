@@ -271,10 +271,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
     // 句読点セットを設定（アポストロフィーが含まれていない古い設定を更新）
     let finalPuncts = p || defaultPuncts;
-    if(p && !p.includes(apostrophe)) {
-      finalPuncts = p + apostrophe;
-      localStorage.setItem('tcl_puncts', finalPuncts);
-    }
     decPuncts.value = finalPuncts;
 
 
@@ -710,23 +706,23 @@ function findWordsForChar(char, offset, excludeUsed = [], posIndex = positionInd
 /**
  * 複数の戦略で単語を検索（フォールバック機能付き）
  */
-function findWordsWithFallback(char, offset, excludeUsed = []) {
-  let words = findWordsForChar(char, offset, excludeUsed);
+function findWordsWithFallback(char, offset, excludeUsed = [], wordDatabase = allWords, posIndex = positionIndex) {
+  let words = findWordsForChar(char, offset, excludeUsed, posIndex);
 
   // 戦略1: 完全一致が見つからない場合、近い位置を探す
   if (words.length === 0) {
     for (let deltaPos of [1, -1, 2, -2]) {
       const newOffset = offset + deltaPos;
       if (newOffset >= 1 && newOffset <= 10) {
-        words = findWordsForChar(char, newOffset, excludeUsed);
+        words = findWordsForChar(char, newOffset, excludeUsed, posIndex);
         if (words.length > 0) break;
       }
     }
   }
 
-  // 戦略2: それでも見つからない場合、文字を含む任意の単語を探す
+  // 戦略2: それでも見つからない場合、同じ語彙のなかで文字を含む語を探す
   if (words.length === 0) {
-    words = allWords.filter(word =>
+    words = wordDatabase.filter(word =>
       word.toLowerCase().includes(char.toLowerCase()) &&
       !excludeUsed.includes(word)
     );
@@ -773,9 +769,9 @@ function generateTrevanionText(plaintext, offset = 3, style = 'formal') {
     let words = findWordsWithFallback(char, offset, usedWords, isJapanese ? japaneseWords : allWords, isJapanese ? japanesePositionIndex : positionIndex);
 
     if (words.length === 0) {
-      // 最終フォールバック: 制御された文字挿入
-      const padding = generatePadding(offset - 1);
-      result += `、${padding}${char}`;
+      // 最終フォールバック: 言語に合う句読点で区切り、目標の文字をオフセットの位置に置く
+      const padding = generatePadding(offset - 1, isJapanese);
+      result += `${isJapanese ? '、' : ', '}${padding}${char}`;
     } else {
       // 最適な単語を選択
       const selectedWord = selectBestWord(words, char, offset);
@@ -791,9 +787,9 @@ function generateTrevanionText(plaintext, offset = 3, style = 'formal') {
     }
   }
 
-  // 終了フレーズ
+  // 終了フレーズ（言語に合わせる）
   const ending = elements.enders[Math.floor(Math.random() * elements.enders.length)];
-  result += `. Yours ${ending}.`;
+  result += isJapanese ? `。${ending}。` : `. Yours ${ending}.`;
 
   return result;
 }
@@ -801,20 +797,24 @@ function generateTrevanionText(plaintext, offset = 3, style = 'formal') {
 /**
  * パディング文字列生成
  */
-function generatePadding(length) {
-  const fillers = ['my', 'oh', 'ah', 'or', 'so', 'to', 'by', 'in', 'of', 'at'];
+function generatePadding(length, isJapanese = false) {
+  // 末尾に空白を付けない（「空白も数える」設定のとき、目標の文字の位置がずれるため）
+  const fillers = isJapanese
+    ? ['あの', 'その', 'いま', 'また', 'もう', 'ただ', 'やや', 'なお']
+    : ['my', 'oh', 'ah', 'or', 'so', 'to', 'by', 'in', 'of', 'at'];
+  const filler = isJapanese ? 'ん' : 'a';
   let padding = '';
 
   while (padding.length < length) {
-    const filler = fillers[Math.floor(Math.random() * fillers.length)];
-    if (padding.length + filler.length <= length) {
-      padding += filler;
+    const piece = fillers[Math.floor(Math.random() * fillers.length)];
+    if (padding.length + piece.length <= length) {
+      padding += piece;
     } else {
-      padding += 'a'.repeat(length - padding.length);
+      padding += filler.repeat(length - padding.length);
     }
   }
 
-  return padding + ' ';
+  return padding;
 }
 
 /**
@@ -873,12 +873,12 @@ function addTextEnhancement(elements, shouldAdd) {
 /**
  * 品質評価付き候補生成
  */
-function generateQualityCandidates(plaintext, puncts, offset, countSpaces, targetCount = 7) {
+function generateQualityCandidates(plaintext, puncts, offset, countSpaces, targetCount = 7, style = 'formal') {
   const candidates = [];
   const maxAttempts = targetCount * 3; // 品質フィルタリングのため多めに生成
 
   for (let i = 0; i < maxAttempts && candidates.length < targetCount; i++) {
-    const candidate = generateTrevanionText(plaintext, offset);
+    const candidate = generateTrevanionText(plaintext, offset, style);
 
     // 品質チェック
     const quality = evaluateTextQuality(candidate, plaintext, puncts, offset, countSpaces);
@@ -967,7 +967,7 @@ function renderCandidates(candidates, plaintext, puncts, offset, countSpaces) {
           <button class="copy-candidate" data-candidate="${index}">📋 コピー</button>
         </div>
         <div class="candidate-text">${escapeHtml(candidate)}</div>
-        <div class="candidate-preview">${renderHighlight(candidate, trevanionExtract(candidate, puncts, offset, false).indices, puncts)}</div>
+        <div class="candidate-preview">${renderHighlight(candidate, trevanionExtract(candidate, puncts, offset, countSpaces).indices, puncts)}</div>
       </div>
     `;
   });
@@ -1048,7 +1048,7 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
     // UI更新
     const avgQuality = currentCandidates.length > 0 ?
       currentCandidates.reduce((sum, candidate) => {
-        const quality = evaluateTextQuality(candidate, plaintext, puncts, offset);
+        const quality = evaluateTextQuality(candidate, plaintext, puncts, offset, countSpaces);
         return sum + quality.score;
       }, 0) / currentCandidates.length : 0;
 
@@ -1074,7 +1074,7 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
 
     // 完全一致候補の数をカウント
     const perfectMatches = currentCandidates.filter(candidate => {
-      const quality = evaluateTextQuality(candidate, plaintext, puncts, offset);
+      const quality = evaluateTextQuality(candidate, plaintext, puncts, offset, countSpaces);
       return quality.isValid;
     }).length;
 
@@ -1211,7 +1211,7 @@ startSearchBtn?.addEventListener('click', async () => {
  */
 pauseSearchBtn?.addEventListener('click', () => {
   searchState.shouldStop = true;
-  showToast('⏸️ 探索を一時停止しています...');
+  showToast('⏹️ 探索を打ち切ります…');
 });
 
 /**

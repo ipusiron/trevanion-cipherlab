@@ -86,7 +86,7 @@
       <!-- サブタブ -->
       <nav class="sub-tabs" role="tablist" aria-label="Encrypt Sub Tabs">
         <button class="sub-tab-btn active" data-subtab="generate-support" role="tab" aria-selected="true">生成支援</button>
-        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false">自動生成</button>
+        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false">自動生成（実験的）</button>
       </nav>
 
       <!-- 生成支援サブタブ -->
@@ -136,6 +136,14 @@
 
       <!-- 自動生成サブタブ -->
       <div id="auto-generate" class="sub-tab-panel" role="tabpanel" aria-label="自動生成">
+
+        <div class="warn-box">
+
+          <strong>この機能は実験的です。</strong>
+
+          いまの作り方では、句読点の直後に置かれるのが接続詞のほうになるため、狙った文字が抽出位置にそろうのは偶然に頼っています。完全一致はほとんど出ません。カバーテキストは「生成支援」タブで自分で書き、制約チェックで確かめるほうが確実です。
+
+        </div>
         <h3>自動生成</h3>
         <p class="note">
           平文を入力すると、トレヴァニオン暗号のカバーテキストを自動生成します。

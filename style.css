@@ -1048,3 +1048,15 @@ details.tips ul {
 .note-spaced {
   margin-top: 20px;
 }
+
+/* 実験的な機能であることを伝える枠 */
+.warn-box {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: var(--hl);
+  border: 1px solid var(--warn);
+  border-left-width: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.7;
+}
