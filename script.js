@@ -1,6 +1,17 @@
 const Core = globalThis.TrevanionCore;
 const I18n = globalThis.TrevanionI18n;
 
+// 言語を切り替えたときに、すでに画面に出ている結果を組み立て直すための覚え書き。
+// 出すときに showAgain() を通しておくと、切り替えで同じ引数のまま描き直される。
+const rerenderers = new Map();
+function showAgain(key, fn) {
+  rerenderers.set(key, fn);
+  fn();
+}
+I18n.onChange(() => {
+  for (const fn of rerenderers.values()) fn();
+});
+
 /* ==========================================================================
    UI Navigation - Tab Switching
    ========================================================================== */
@@ -280,18 +291,13 @@ decRun?.addEventListener('click', () => {
 });
 
 // 規則を総当たりして、それらしい順に並べる（どの設定で読めるかを探す助け）
-const COUNT_MODE_LABEL = { nonSpace: '空白以外', all: '空白も', alnum: '英数字・かなだけ' };
-const MODE_LABEL = { stop: '打ち切る', skip: '飛ばして続ける', count: '句読点も数える' };
-
-decSweep?.addEventListener('click', () => {
-  const text = decText.value || '';
-  const puncts = normalizePuncts(decPuncts.value || Core.DEFAULT_PUNCTS);
+function renderSweep(text, puncts) {
   decSweepResult.replaceChildren();
 
   if (!text.trim()) {
     const p = document.createElement('p');
     p.className = 'muted';
-    p.textContent = '対象テキストを入れてください。';
+    p.textContent = I18n.t('sweep.needText');
     decSweepResult.append(p);
     decSweepResult.hidden = false;
     return;
@@ -301,15 +307,16 @@ decSweep?.addEventListener('click', () => {
 
   const head = document.createElement('p');
   head.className = 'muted';
-  head.textContent = `オフセット1〜${Core.MAX_OFFSET} × 数え方3通り × 句読点の扱い3通りを試し、`
-    + `それらしい順に上位${rows.length}件を並べました。`;
+  head.textContent = I18n.t('sweep.head', { max: Core.MAX_OFFSET, count: rows.length });
   decSweepResult.append(head);
 
   const table = document.createElement('table');
   table.className = 'sweep-table';
   const thead = document.createElement('thead');
   const hr = document.createElement('tr');
-  for (const label of ['#', 'オフセット', '数える対象', '句読点に当たったら', 'それらしさ', '取り出した文字']) {
+  const headers = ['#', I18n.t('sweep.col.offset'), I18n.t('sweep.col.count'),
+    I18n.t('sweep.col.mode'), I18n.t('sweep.col.score'), I18n.t('sweep.col.text')];
+  for (const label of headers) {
     const th = document.createElement('th');
     th.textContent = label;
     hr.append(th);
@@ -323,8 +330,8 @@ decSweep?.addEventListener('click', () => {
     const cells = [
       String(i + 1),
       String(r.offset),
-      COUNT_MODE_LABEL[r.countMode] || r.countMode,
-      MODE_LABEL[r.mode] || r.mode,
+      I18n.t(`countMode.${r.countMode}`),
+      I18n.t(`mode.${r.mode}`),
       `${(r.score.score * 100).toFixed(0)}%`,
       r.message.slice(0, 60),
     ];
@@ -339,7 +346,7 @@ decSweep?.addEventListener('click', () => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'secondary sweep-apply';
-    btn.textContent = 'この設定で見る';
+    btn.textContent = I18n.t('sweep.apply');
     btn.addEventListener('click', () => {
       decOffset.value = String(r.offset);
       decCountMode.value = r.countMode;
@@ -354,6 +361,12 @@ decSweep?.addEventListener('click', () => {
   table.append(tbody);
   decSweepResult.append(table);
   decSweepResult.hidden = false;
+}
+
+decSweep?.addEventListener('click', () => {
+  const text = decText.value || '';
+  const puncts = normalizePuncts(decPuncts.value || Core.DEFAULT_PUNCTS);
+  showAgain('sweep', () => renderSweep(text, puncts));
 });
 
 /* ==========================================================================
@@ -455,14 +468,14 @@ copyBtn?.addEventListener('click', async () => {
 
   // コピーする内容があるかチェック
   if (!resultText.trim()) {
-    showToast('コピーする内容がありません');
+    showToast(I18n.t('toast.nothingToCopy'));
     return;
   }
 
   try {
     // 現代的なClipboard APIを使用
     await navigator.clipboard.writeText(resultText);
-    showToast('📋 抽出結果をコピーしました！');
+    showToast(I18n.t('toast.copied'));
   } catch (err) {
     // 古いブラウザー向けのフォールバック
     try {
@@ -472,10 +485,10 @@ copyBtn?.addEventListener('click', async () => {
       textArea.select();
       document.execCommand('copy');  // 非推奨だがフォールバックとして使用
       document.body.removeChild(textArea);
-      showToast('📋 抽出結果をコピーしました！');
+      showToast(I18n.t('toast.copied'));
     } catch (fallbackErr) {
       console.error('Copy failed:', fallbackErr);
-      showToast('❌ コピーに失敗しました');
+      showToast(I18n.t('toast.copyFailed'));
     }
   }
 });
@@ -520,40 +533,40 @@ function generateConstraintReport(result, covertext, puncts) {
   let html = '<div class="constraint-summary">';
 
   if (result.isValid) {
-    html += '<div class="status success">✅ 制約チェック成功！すべての文字が正しく配置されています。</div>';
+    html += `<div class="status success">${escapeHtml(I18n.t('check.ok'))}</div>`;
   } else {
-    html += '<div class="status error">⚠️ 制約チェックで問題が見つかりました：</div>';
+    html += `<div class="status error">${escapeHtml(I18n.t('check.ng'))}</div>`;
     html += '<ul class="issue-list">';
 
     if (result.missing.length > 0) {
-      html += `<li class="missing">不足: ${result.missing.length}文字 (${result.missing.map(m => `"${escapeHtml(m.expected)}"`).join(', ')})</li>`;
+      const list = result.missing.map(m => `"${escapeHtml(m.expected)}"`).join(', ');
+      html += `<li class="missing">${escapeHtml(I18n.t('check.missing', { count: result.missing.length, list: '\u0000' })).replace('\u0000', list)}</li>`;
     }
     if (result.mismatches.length > 0) {
-      html += `<li class="mismatch">不一致: ${result.mismatches.length}箇所</li>`;
+      html += `<li class="mismatch">${escapeHtml(I18n.t('check.mismatch', { count: result.mismatches.length }))}</li>`;
     }
     if (result.extra.length > 0) {
-      html += `<li class="extra">余分: ${result.extra.length}文字</li>`;
+      html += `<li class="extra">${escapeHtml(I18n.t('check.extra', { count: result.extra.length }))}</li>`;
     }
 
     html += '</ul>';
   }
 
-  html += `<div class="stats">一致: ${result.matches}/${result.expectedLength}文字</div>`;
+  html += `<div class="stats">${escapeHtml(I18n.t('check.stats', { match: result.matches, total: result.expectedLength }))}</div>`;
   html += '</div>';
 
   // 詳細表
   if (result.details.length > 0) {
     html += '<table class="constraint-table">';
-    html += '<thead><tr><th>位置</th><th>期待値</th><th>実際</th><th>状態</th></tr></thead><tbody>';
+    const cols = ['check.col.pos', 'check.col.expected', 'check.col.actual', 'check.col.status']
+      .map((k) => `<th>${escapeHtml(I18n.t(k))}</th>`).join('');
+    html += `<thead><tr>${cols}</tr></thead><tbody>`;
 
     result.details.forEach((detail, i) => {
       const statusClass = detail.status;
-      const statusText = {
-        'match': '✅ 一致',
-        'mismatch': '❌ 不一致',
-        'missing': '❓ 不足',
-        'extra': '➕ 余分'
-      }[detail.status] || '?';
+      const statusText = ['match', 'mismatch', 'missing', 'extra'].includes(detail.status)
+        ? escapeHtml(I18n.t(`check.status.${detail.status}`))
+        : '?';
 
       html += `<tr class="row-${statusClass}">`;
       html += `<td>${i + 1}</td>`;
@@ -569,21 +582,15 @@ function generateConstraintReport(result, covertext, puncts) {
   return html;
 }
 
-encCheck?.addEventListener('click', ()=>{
-  const plain = (encPlain.value || '').replace(/\r?\n/g,'');
-  const cover = encCover.value || '';
-  const puncts = normalizePuncts(punctsInput.value || '、。,.!?;:');
-  const offset = Math.max(1, parseInt(encOffset.value||'3', 10));
-  const countSpaces = !!countSpacesChk.checked;
-
+function renderCheck(plain, cover, puncts, offset, countSpaces) {
   if (!plain.trim()) {
-    encReport.innerHTML = '<div class="error">平文を入力してください。</div>';
+    encReport.innerHTML = `<div class="error">${escapeHtml(I18n.t('check.needPlain'))}</div>`;
     encPreview.innerHTML = '';
     return;
   }
 
   if (!cover.trim()) {
-    encReport.innerHTML = '<div class="error">カバーテキストを入力してください。</div>';
+    encReport.innerHTML = `<div class="error">${escapeHtml(I18n.t('check.needCover'))}</div>`;
     encPreview.innerHTML = '';
     return;
   }
@@ -597,6 +604,15 @@ encCheck?.addEventListener('click', ()=>{
   // プレビュー表示（ハイライト）
   const extraction = trevanionExtract(cover, puncts, offset, countSpaces);
   encPreview.innerHTML = renderHighlight(cover, extraction.indices, puncts);
+}
+
+encCheck?.addEventListener('click', ()=>{
+  const plain = (encPlain.value || '').replace(/\r?\n/g,'');
+  const cover = encCover.value || '';
+  const puncts = normalizePuncts(punctsInput.value || '、。,.!?;:');
+  const offset = Math.max(1, parseInt(encOffset.value||'3', 10));
+  const countSpaces = !!countSpacesChk.checked;
+  showAgain('check', () => renderCheck(plain, cover, puncts, offset, countSpaces));
 });
 
 /* ==========================================================================
@@ -1031,7 +1047,7 @@ function evaluateTextQuality(text, plaintext, puncts, offset, countSpaces) {
  */
 function renderCandidates(candidates, plaintext, puncts, offset, countSpaces) {
   if (!candidates || candidates.length === 0) {
-    return '<p class="error">候補を生成できませんでした。</p>';
+    return `<p class="error">${escapeHtml(I18n.t('gen.none'))}</p>`;
   }
 
   let html = '';
@@ -1055,22 +1071,22 @@ function renderCandidates(candidates, plaintext, puncts, offset, countSpaces) {
 
     if (isPerfectMatch) {
       validityIcon = '🎯';
-      validityText = '完全一致';
+      validityText = I18n.t('gen.perfect');
       qualityBadge = '<span class="perfect-badge">PERFECT</span>';
     } else {
       const matchRate = result.expectedLength > 0 ? (result.matches / result.expectedLength) : 0;
       if (matchRate >= 0.8) {
         validityIcon = '✅';
-        validityText = `優秀: ${result.matches}/${result.expectedLength}`;
+        validityText = I18n.t('gen.good', { match: result.matches, total: result.expectedLength });
       } else if (matchRate >= 0.6) {
         validityIcon = '⚡';
-        validityText = `良好: ${result.matches}/${result.expectedLength}`;
+        validityText = I18n.t('gen.fair', { match: result.matches, total: result.expectedLength });
       } else if (matchRate >= 0.4) {
         validityIcon = '⚠️';
-        validityText = `普通: ${result.matches}/${result.expectedLength}`;
+        validityText = I18n.t('gen.soso', { match: result.matches, total: result.expectedLength });
       } else {
         validityIcon = '❌';
-        validityText = `要調整: ${result.matches}/${result.expectedLength}`;
+        validityText = I18n.t('gen.poor', { match: result.matches, total: result.expectedLength });
       }
     }
 
@@ -1078,10 +1094,10 @@ function renderCandidates(candidates, plaintext, puncts, offset, countSpaces) {
       <div class="${itemClass}" data-index="${index}">
         <div class="${headerClass}">
           <h5>
-            候補 ${index + 1} ${validityIcon} ${validityText}
+            ${escapeHtml(I18n.t('gen.candidate', { n: index + 1 }))} ${validityIcon} ${escapeHtml(validityText)}
             ${qualityBadge}
           </h5>
-          <button class="copy-candidate" data-candidate="${index}">📋 コピー</button>
+          <button class="copy-candidate" data-candidate="${index}">${escapeHtml(I18n.t('dec.copy'))}</button>
         </div>
         <div class="candidate-text">${escapeHtml(candidate)}</div>
         <div class="candidate-preview">${renderHighlight(candidate, trevanionExtract(candidate, puncts, offset, countSpaces).indices, puncts)}</div>
@@ -1093,7 +1109,7 @@ function renderCandidates(candidates, plaintext, puncts, offset, countSpaces) {
   if (perfectMatchCount > 0) {
     const summaryMessage = `
       <div class="perfect-summary">
-        🎉 <strong>${perfectMatchCount}個の完全一致候補</strong>が見つかりました！完全一致候補は金色の枠で表示されています。
+        ${escapeHtml(I18n.t('gen.perfectSummary', { count: perfectMatchCount }))}
       </div>
     `;
     html = summaryMessage + html;
@@ -1122,7 +1138,7 @@ autoGenerateBtn?.addEventListener('click', () => {
 
   if (!plaintext) {
     autoResults.hidden = true;
-    showToast('平文を入力してください');
+    showToast(I18n.t('toast.needPlain'));
     return;
   }
 
@@ -1159,7 +1175,7 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
       for (let i = 0; i < 5; i++) {
         currentCandidates.push(generateTrevanionText(plaintext, offset, style));
       }
-      showToast('⚠️ 高品質な候補が生成できませんでした。基本生成を使用します。');
+      showToast(I18n.t('gen.fallback'));
     }
 
     // UI更新
@@ -1169,23 +1185,28 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
         return sum + quality.score;
       }, 0) / currentCandidates.length : 0;
 
-    autoInfo.innerHTML = `
-      ${currentCandidates.length}個の候補を生成<br>
-      <small>平文: "${escapeHtml(plaintext)}" | オフセット: ${offset} | 平均品質: ${(avgQuality * 100).toFixed(1)}%</small>
-    `;
+    // 言語を切り替えたら、同じ候補のまま文言だけ組み立て直す
+    showAgain('candidates', () => {
+      autoInfo.innerHTML = `
+        ${escapeHtml(I18n.t('gen.info', { count: currentCandidates.length }))}<br>
+        <small>${escapeHtml(I18n.t('gen.infoDetail', {
+          plain: plaintext, offset, quality: (avgQuality * 100).toFixed(1),
+        }))}</small>
+      `;
 
-    autoCandidates.innerHTML = renderCandidates(currentCandidates, plaintext, puncts, offset, countSpaces);
-    autoResults.hidden = false;
+      autoCandidates.innerHTML = renderCandidates(currentCandidates, plaintext, puncts, offset, countSpaces);
+      autoResults.hidden = false;
 
-    // 候補のコピーボタンイベント
-    document.querySelectorAll('.copy-candidate').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const candidateIndex = parseInt(e.target.dataset.candidate);
-        const candidateText = currentCandidates[candidateIndex];
+      // 候補のコピーボタンイベント
+      document.querySelectorAll('.copy-candidate').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const candidateIndex = parseInt(e.target.dataset.candidate);
+          const candidateText = currentCandidates[candidateIndex];
 
-        if (candidateText) {
-          copyToClipboard(candidateText, `候補 ${candidateIndex + 1} をコピーしました！`);
-        }
+          if (candidateText) {
+            copyToClipboard(candidateText, I18n.t('toast.candidateCopied', { n: candidateIndex + 1 }));
+          }
+        });
       });
     });
 
@@ -1197,25 +1218,25 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
 
     let qualityMessage;
     if (perfectMatches > 0) {
-      qualityMessage = `🎉 完全一致 ${perfectMatches}個含む`;
+      qualityMessage = I18n.t('gen.qualityPerfect', { count: perfectMatches });
     } else if (avgQuality >= 0.8) {
-      qualityMessage = '🎯 高品質';
+      qualityMessage = I18n.t('gen.quality1');
     } else if (avgQuality >= 0.6) {
-      qualityMessage = '✨ 良品質';
+      qualityMessage = I18n.t('gen.quality2');
     } else if (avgQuality >= 0.4) {
-      qualityMessage = '⚡ 標準品質';
+      qualityMessage = I18n.t('gen.quality3');
     } else {
-      qualityMessage = '🔧 要調整';
+      qualityMessage = I18n.t('gen.quality4');
     }
 
-    showToast(`${qualityMessage} ${currentCandidates.length}個の候補を生成しました`);
+    showToast(I18n.t('gen.toast', { quality: qualityMessage, count: currentCandidates.length }));
 
   } catch (error) {
     console.error('Generation error:', error);
-    autoInfo.textContent = 'エラーが発生しました';
-    autoCandidates.innerHTML = '<p class="error">生成中にエラーが発生しました。</p>';
+    autoInfo.textContent = I18n.t('gen.error');
+    autoCandidates.innerHTML = `<p class="error">${escapeHtml(I18n.t('gen.errorBody'))}</p>`;
     autoResults.hidden = false;
-    showToast('❌ 生成に失敗しました');
+    showToast(I18n.t('gen.errorToast'));
   }
 }
 
@@ -1235,7 +1256,7 @@ async function copyToClipboard(text, successMessage) {
       showToast(successMessage);
     } catch (fallbackErr) {
       console.error('Copy failed:', fallbackErr);
-      showToast('❌ コピーに失敗しました');
+      showToast(I18n.t('toast.copyFailed'));
     }
   }
 }
@@ -1278,7 +1299,7 @@ startSearchBtn?.addEventListener('click', async () => {
   const maxAttempts = Math.max(100, parseInt(maxAttemptsInput.value || '1000', 10));
 
   if (!plaintext) {
-    showToast('平文を入力してください');
+    showToast(I18n.t('toast.needPlain'));
     return;
   }
 
@@ -1311,13 +1332,13 @@ startSearchBtn?.addEventListener('click', async () => {
   // 時間表示の更新開始
   searchState.timeInterval = setInterval(updateSearchTime, 1000);
 
-  showToast(`🎯 完全一致探索を開始しました (目標: ${targetCount}個)`);
+  showToast(I18n.t('search.started', { count: targetCount }));
 
   try {
     await performPerfectSearch(plaintext, puncts, offset, countSpaces, style, targetCount, maxAttempts);
   } catch (error) {
     console.error('Search error:', error);
-    showToast('❌ 探索中にエラーが発生しました');
+    showToast(I18n.t('search.error'));
   } finally {
     stopSearch();
   }
@@ -1328,7 +1349,7 @@ startSearchBtn?.addEventListener('click', async () => {
  */
 pauseSearchBtn?.addEventListener('click', () => {
   searchState.shouldStop = true;
-  showToast('⏹️ 探索を打ち切ります…');
+  showToast(I18n.t('search.pausing'));
 });
 
 /**
@@ -1337,7 +1358,7 @@ pauseSearchBtn?.addEventListener('click', () => {
 stopSearchBtn?.addEventListener('click', () => {
   searchState.shouldStop = true;
   resetSearchUI();
-  showToast('⏹️ 探索を完全停止しました');
+  showToast(I18n.t('search.stopped'));
 });
 
 /**
@@ -1362,7 +1383,7 @@ async function performPerfectSearch(plaintext, puncts, offset, countSpaces, styl
     // 完全一致をチェック
     if (quality.isValid) {
       searchState.perfectMatches.push(candidate);
-      showToast(`🎉 完全一致発見！ (${searchState.perfectMatches.length}/${targetCount})`);
+      showToast(I18n.t('search.found', { found: searchState.perfectMatches.length, target: targetCount }));
       // 完全一致発見時は即座に進捗更新
       updateSearchProgress(targetCount, maxAttempts);
     }
@@ -1381,15 +1402,15 @@ async function performPerfectSearch(plaintext, puncts, offset, countSpaces, styl
   updateSearchProgress(targetCount, maxAttempts);
 
   if (searchState.perfectMatches.length >= targetCount) {
-    showToast(`🎊 目標達成！ ${searchState.perfectMatches.length}個の完全一致候補を発見`);
+    showToast(I18n.t('search.reached', { count: searchState.perfectMatches.length }));
     displayPerfectSearchResults(searchState.perfectMatches, plaintext, puncts, offset, countSpaces);
   } else if (searchState.attempts >= maxAttempts) {
-    showToast(`⏰ 最大試行回数に到達しました (${searchState.perfectMatches.length}個発見)`);
+    showToast(I18n.t('search.maxed', { count: searchState.perfectMatches.length }));
     if (searchState.perfectMatches.length > 0) {
       displayPerfectSearchResults(searchState.perfectMatches, plaintext, puncts, offset, countSpaces);
     }
   } else if (searchState.shouldStop) {
-    showToast(`🛑 探索を停止しました (${searchState.perfectMatches.length}個発見)`);
+    showToast(I18n.t('search.halted', { count: searchState.perfectMatches.length }));
     if (searchState.perfectMatches.length > 0) {
       displayPerfectSearchResults(searchState.perfectMatches, plaintext, puncts, offset, countSpaces);
     }
@@ -1399,9 +1420,19 @@ async function performPerfectSearch(plaintext, puncts, offset, countSpaces, styl
 /**
  * 探索進捗の更新
  */
+function renderSearchStats() {
+  if (!attemptsCount || !perfectFound || !searchTime) return;
+  attemptsCount.textContent = I18n.t('auto.search.attempts', { count: searchState.attempts.toLocaleString() });
+  perfectFound.textContent = I18n.t('auto.search.perfect', { count: searchState.perfectMatches.length });
+  const elapsed = searchState.startTime ? Date.now() - searchState.startTime : 0;
+  const minutes = Math.floor(elapsed / 60000);
+  const seconds = Math.floor((elapsed % 60000) / 1000);
+  renderSearchStats.time = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  searchTime.textContent = I18n.t('auto.search.elapsed', { time: renderSearchStats.time });
+}
+
 function updateSearchProgress(targetCount, maxAttempts) {
-  attemptsCount.textContent = `試行回数: ${searchState.attempts.toLocaleString()}`;
-  perfectFound.textContent = `完全一致: ${searchState.perfectMatches.length}`;
+  renderSearchStats();
 
   // プログレスバーの更新
   let progress = 0;
@@ -1431,11 +1462,7 @@ function updateSearchProgress(targetCount, maxAttempts) {
  */
 function updateSearchTime() {
   if (!searchState.startTime) return;
-
-  const elapsed = Date.now() - searchState.startTime;
-  const minutes = Math.floor(elapsed / 60000);
-  const seconds = Math.floor((elapsed % 60000) / 1000);
-  searchTime.textContent = `経過時間: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  renderSearchStats();
 }
 
 /**
@@ -1506,23 +1533,28 @@ function displayPerfectSearchResults(perfectMatches, plaintext, puncts, offset, 
   currentCandidates = perfectMatches;
 
   // UI更新
-  autoInfo.innerHTML = `
-    🎯 完全一致探索結果: ${perfectMatches.length}個の完全一致候補<br>
-    <small>試行回数: ${searchState.attempts.toLocaleString()} | 平文: "${escapeHtml(plaintext)}" | 句読点: "${escapeHtml(puncts)}" | オフセット: ${offset}</small>
-  `;
+  const attempts = searchState.attempts.toLocaleString();
+  showAgain('candidates', () => {
+    autoInfo.innerHTML = `
+      ${escapeHtml(I18n.t('search.resultInfo', { count: perfectMatches.length }))}<br>
+      <small>${escapeHtml(I18n.t('search.resultDetail', {
+        attempts, plain: plaintext, puncts, offset,
+      }))}</small>
+    `;
 
-  autoCandidates.innerHTML = renderCandidates(perfectMatches, plaintext, puncts, offset, countSpaces);
-  autoResults.hidden = false;
+    autoCandidates.innerHTML = renderCandidates(perfectMatches, plaintext, puncts, offset, countSpaces);
+    autoResults.hidden = false;
 
-  // コピーボタンイベントの設定
-  document.querySelectorAll('.copy-candidate').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const candidateIndex = parseInt(e.target.dataset.candidate);
-      const candidateText = perfectMatches[candidateIndex];
+    // コピーボタンイベントの設定
+    document.querySelectorAll('.copy-candidate').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const candidateIndex = parseInt(e.target.dataset.candidate);
+        const candidateText = perfectMatches[candidateIndex];
 
-      if (candidateText) {
-        copyToClipboard(candidateText, `完全一致候補 ${candidateIndex + 1} をコピーしました！`);
-      }
+        if (candidateText) {
+          copyToClipboard(candidateText, I18n.t('toast.perfectCopied', { n: candidateIndex + 1 }));
+        }
+      });
     });
   });
 }
@@ -1566,6 +1598,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // HTML に書いた文言を、選ばれた言語で差し替える（?lang= → 保存した選択 → ブラウザーの言語）
 I18n.init();
+
+// 探索の数字（試行回数・完全一致・経過時間）も言語にあわせて出し直す
+showAgain('searchStats', renderSearchStats);
 
 const langToggle = document.getElementById('lang-toggle');
 if (langToggle) {

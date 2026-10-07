@@ -169,8 +169,14 @@ test('data-i18n-attr で差し替える属性が、HTMLにも同じ値で書い�
 
 test('辞書のキーはどこかで使われている', () => {
   const sources = ['index.html', 'script.js', 'js/i18n.js'].map(read).join('\n');
-  const unused = Object.keys(DICT.ja).filter((k) => !sources.includes(k));
+  // I18n.t(`check.status.${…}`) のように組み立てるキーは、前半だけが書かれている
+  const prefixes = [...sources.matchAll(/I18n\.t\(`([a-zA-Z.]+)\.\$\{/g)].map((m) => `${m[1]}.`);
+  // 前後が区切りであること（dec.countMode.nonSpace が countMode.nonSpace に当たらないように）
+  const used = (key) => new RegExp(`(?<![\\w.])${key.replace(/\./g, '\\.')}(?![\\w.])`).test(sources)
+    || prefixes.some((p) => key.startsWith(p));
+  const unused = Object.keys(DICT.ja).filter((k) => !used(k));
   assert.deepEqual(unused, []);
+  assert.ok(prefixes.length >= 3, `組み立てるキーの前半が ${prefixes.length} 件しか見つからない`);
 });
 
 test('言語の選び方は ?lang= → 保存した選択 → ブラウザーの言語', () => {
