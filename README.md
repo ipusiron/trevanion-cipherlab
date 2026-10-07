@@ -35,6 +35,8 @@ hub: true
 ---
 -->
 
+[English](README.en.md) · 日本語
+
 # Trevanion CipherLab - トレヴァニオン暗号支援ツール
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/ipusiron/trevanion-cipherlab?style=social)
@@ -142,7 +144,6 @@ hub: true
 - クロノグラム
 - アクロスティック
 - 各句読点の後の何番目かの文字を読み込む…例：トレヴァニオン暗号、コナン・ドイルの『グロリア・スコット号事件』に登場する暗号
-- 
 
 ### Null暗号文の作り方（例）
 1. 紙を縦に3つ折りにする。  
@@ -315,14 +316,21 @@ trevanion-cipherlab/
 │   ├── screenshot2.png     # スクリーンショット（基本タブ・逸話の検証）
 │   ├── screenshot3.png     # スクリーンショット（暗号化タブ・制約チェック）
 │   ├── screenshot4.png     # スクリーンショット（座学タブ）
-│   └── screenshot5.png     # スクリーンショット（規則の総当たり）
+│   ├── screenshot5.png     # スクリーンショット（規則の総当たり）
+│   └── en/                 # 英語の画面のスクリーンショット
+│       ├── screenshot.png  # スクリーンショット（復号タブ）
+│       ├── screenshot2.png # スクリーンショット（基本タブ）
+│       ├── screenshot3.png # スクリーンショット（暗号化タブ）
+│       ├── screenshot4.png # スクリーンショット（座学タブ）
+│       └── screenshot5.png # スクリーンショット（規則の総当たり）
 ├── package.json            # テストの実行設定（依存パッケージはない）
 ├── CLAUDE.md               # Claude Code 向けの案内
 ├── ENCRYPTION.md           # 暗号化の機能のくわしい説明
 ├── LICENSE                 # MITライセンス
 ├── .gitignore              # Git の除外設定
 ├── .nojekyll               # GitHub Pages で Jekyll を使わない指定
-└── README.md               # このファイル
+├── README.md               # このファイル
+└── README.en.md            # 英語版のREADME
 ```
 
 ---
