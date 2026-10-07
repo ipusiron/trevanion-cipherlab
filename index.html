@@ -16,14 +16,14 @@
 
   <main class="container">
     <nav class="tabs" role="tablist" aria-label="Main Tabs">
-      <button class="tab-btn active" data-tab="basic" role="tab" aria-selected="true">トレヴァニオン暗号の基本</button>
-      <button class="tab-btn" data-tab="encrypt" role="tab" aria-selected="false">暗号化（隠蔽化）</button>
-      <button class="tab-btn" data-tab="decrypt" role="tab" aria-selected="false">復号（可視化）</button>
-      <button class="tab-btn" data-tab="study" role="tab" aria-selected="false">Null暗号の座学</button>
+      <button class="tab-btn active" id="tab-btn-basic" data-tab="basic" role="tab" aria-selected="true" aria-controls="basic" tabindex="0">トレヴァニオン暗号の基本</button>
+      <button class="tab-btn" id="tab-btn-encrypt" data-tab="encrypt" role="tab" aria-selected="false" aria-controls="encrypt" tabindex="-1">暗号化（隠蔽化）</button>
+      <button class="tab-btn" id="tab-btn-decrypt" data-tab="decrypt" role="tab" aria-selected="false" aria-controls="decrypt" tabindex="-1">復号（可視化）</button>
+      <button class="tab-btn" id="tab-btn-study" data-tab="study" role="tab" aria-selected="false" aria-controls="study" tabindex="-1">Null暗号の座学</button>
     </nav>
 
     <!-- 基本 -->
-    <section id="basic" class="tab-panel active" role="tabpanel" aria-label="基本">
+    <section id="basic" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-basic" tabindex="0">
       <h2>トレヴァニオン暗号の基本</h2>
 
       <details class="accordion" open>
@@ -80,7 +80,7 @@
     </section>
 
     <!-- 暗号化（隠蔽化） -->
-    <section id="encrypt" class="tab-panel" role="tabpanel" aria-label="暗号化（隠蔽化）">
+    <section id="encrypt" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-encrypt" tabindex="0">
       <h2>暗号化</h2>
 
       <!-- サブタブ -->
@@ -191,7 +191,7 @@
             </div>
 
             <div class="perfect-search-controls">
-              <label for="target-perfect-count">目標完全一致数：<span class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数">❓</span></label>
+              <label for="target-perfect-count">目標完全一致数：<button type="button" class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数" aria-label="説明を表示">❓</button></label>
               <input type="number" id="target-perfect-count" value="2" min="1" max="10" />
 
               <label for="max-attempts">最大試行回数：</label>
@@ -243,7 +243,7 @@
     </section>
 
     <!-- 復号（可視化） -->
-    <section id="decrypt" class="tab-panel" role="tabpanel" aria-label="復号（可視化）">
+    <section id="decrypt" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-decrypt" tabindex="0">
       <h2>復号（可視化）</h2>
 
       <div class="controls">
@@ -276,7 +276,7 @@
     </section>
 
     <!-- 座学 -->
-    <section id="study" class="tab-panel" role="tabpanel" aria-label="座学">
+    <section id="study" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-study" tabindex="0">
       <h2>Null暗号の座学</h2>
 
       <details class="accordion" open>
@@ -348,7 +348,7 @@
           <ul>
             <li>古くからスパイや囚人の密書で利用され、検閲を欺くために活用された。</li>
             <li>現代では「隠しメッセージ」「ステガノグラフィー」の原型として扱われ、教育や歴史研究で取り上げられている。</li>
-            <li>Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
+            <li>Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener noreferrer">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
           </ul>
         </div>
       </details>
@@ -358,7 +358,7 @@
   <footer>
     <div class="footer">
       🔗 GitHubリポジトリはこちら（
-      <a href="https://github.com/ipusiron/trevanion-cipherlab" target="_blank" rel="noopener">ipusiron/trevanion-cipherlab</a>
+      <a href="https://github.com/ipusiron/trevanion-cipherlab" target="_blank" rel="noopener noreferrer">ipusiron/trevanion-cipherlab</a>
       ）
     </div>
   </footer>

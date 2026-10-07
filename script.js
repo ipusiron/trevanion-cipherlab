@@ -12,21 +12,36 @@ const Core = globalThis.TrevanionCore;
 const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = document.querySelectorAll('.tab-panel');
 
+const tabList = [...tabBtns];
+
+function activateTab(btn) {
+  tabBtns.forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+    b.tabIndex = -1;
+  });
+  panels.forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+  btn.tabIndex = 0;
+  document.getElementById(btn.dataset.tab).classList.add('active');
+}
+
 tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    // 全てのタブボタンを非アクティブに
-    tabBtns.forEach(b => {
-      b.classList.remove('active');
-      b.setAttribute('aria-selected', 'false');
-    });
+  btn.addEventListener('click', () => activateTab(btn));
 
-    // 全てのパネルを非表示に
-    panels.forEach(p => p.classList.remove('active'));
-
-    // クリックされたタブとそのパネルをアクティブに
-    btn.classList.add('active');
-    btn.setAttribute('aria-selected', 'true');
-    document.getElementById(btn.dataset.tab).classList.add('active');
+  // 矢印キー・Home・End でも移動できるようにする（role="tab" の作法）
+  btn.addEventListener('keydown', (ev) => {
+    const i = tabList.indexOf(btn);
+    let next = -1;
+    if (ev.key === 'ArrowRight') next = (i + 1) % tabList.length;
+    if (ev.key === 'ArrowLeft') next = (i - 1 + tabList.length) % tabList.length;
+    if (ev.key === 'Home') next = 0;
+    if (ev.key === 'End') next = tabList.length - 1;
+    if (next < 0) return;
+    ev.preventDefault();
+    activateTab(tabList[next]);
+    tabList[next].focus();
   });
 });
 

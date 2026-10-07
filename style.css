@@ -5,13 +5,17 @@
   /* カラーパレット - ライトテーマ */
   --bg:#f5f7fa;              /* 背景色 */
   --panel:#ffffff;           /* パネル背景色 */
-  --ink:#2c3e50;             /* メインテキスト色 */
-  --muted:#718096;           /* 薄いテキスト色 */
-  --accent:#3b82f6;          /* アクセント色（ボタン等） */
-  --accent-hover:#2563eb;    /* アクセント色のホバー状態 */
-  --accent-2:#10b981;        /* セカンダリアクセント色（成功等） */
-  --warn:#f59e0b;            /* 警告色 */
-  --error:#ef4444;           /* エラー色 */
+  --ink:#2c3e50;             /* メインテキスト色（白地に10.23:1） */
+  --muted:#55657d;           /* 薄いテキスト色（白地に5.93:1） */
+  --accent:#2563eb;          /* アクセント色（白地に5.17:1） */
+  --accent-hover:#1d4ed8;    /* アクセント色のホバー状態 */
+  --accent-2:#047857;        /* セカンダリアクセント色（白地に5.48:1） */
+  --warn:#b45309;            /* 警告の文字色（白地に5.02:1） */
+  --warn-bg:#f59e0b;         /* 警告の背景色（黒文字で9.78:1） */
+  --error:#b91c1c;           /* エラー色（白地に6.17:1） */
+  /* 旧来の名前。未定義のまま使われていた箇所があるので、同じ値を割り当てておく */
+  --text:#2c3e50;
+  --text-secondary:#55657d;
   --hl:#f1f5f9;              /* ハイライト背景色 */
   --border:#e2e8f0;          /* ボーダー色 */
 
@@ -237,7 +241,8 @@ input[type="number"] {
   border: 2px solid var(--border);
   border-radius: 8px;
   padding: 12px;
-  font-size: 15px;
+  /* 16px未満だと iOS Safari がフォーカス時に勝手に拡大する */
+  font-size: 16px;
   transition: all 0.2s;
   font-family: monospace;
 }
@@ -275,6 +280,15 @@ textarea {
 
 .opts label {
   white-space: nowrap;
+  min-width: 0;
+}
+
+/* 狭い画面では、長いラベルを折り返せるようにする（幅320pxで画面からはみ出していた） */
+@media (max-width: 640px) {
+  .opts label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* ==========================================================================
@@ -478,7 +492,7 @@ textarea {
 
 /* 抽出文字ハイライト（黄色） */
 .hl {
-  background: var(--warn);
+  background: var(--warn-bg);
   color: #000000;
   border-radius: 4px;
   padding: 2px 6px;
@@ -609,10 +623,10 @@ details.tips ul {
 .row-missing{background:#fffbf0}
 .row-extra{background:#f0f8ff}
 
-.status-match{color:#28a745}
-.status-mismatch{color:#dc3545}
-.status-missing{color:#ffc107}
-.status-extra{color:#007bff}
+.status-match{color:#15803d}
+.status-mismatch{color:#b91c1c}
+.status-missing{color:#92400e}
+.status-extra{color:#1d4ed8}
 
 .error{color:var(--error);font-weight:600;padding:12px 16px;background:var(--hl);border-radius:8px;border-left:4px solid var(--error)}
 
@@ -974,6 +988,10 @@ details.tips ul {
 /* ヘルプアイコン */
 .help-icon {
   display: inline-block;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
   margin-left: 6px;
   color: var(--accent);
   cursor: help;
@@ -983,7 +1001,8 @@ details.tips ul {
   position: relative;
 }
 
-.help-icon:hover {
+.help-icon:hover,
+.help-icon:focus-visible {
   opacity: 1;
 }
 
@@ -993,7 +1012,8 @@ details.tips ul {
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-.help-icon:hover::before {
+.help-icon:hover::before,
+.help-icon:focus-visible::before {
   content: '';
   position: absolute;
   bottom: 115%;
@@ -1004,7 +1024,8 @@ details.tips ul {
   z-index: 1000;
 }
 
-.help-icon:hover::after {
+.help-icon:hover::after,
+.help-icon:focus-visible::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 125%;
@@ -1059,4 +1080,21 @@ details.tips ul {
   border-radius: 8px;
   font-size: 14px;
   line-height: 1.7;
+}
+
+/* 動きを減らす設定のときは、色や形の変化を止める */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* キーボードで操作したときに、いまどこにいるかが見えるようにする */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
