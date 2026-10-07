@@ -110,6 +110,56 @@ test('シリーズ標準の見出しがそろっている', () => {
 });
 
 // 表記のゆれ
+// ---- 英語版のREADME（要約にせず、同じ節をそろえる）
+const readmeEn = read('README.en.md');
+
+test('日本語版と英語版で、見出しの数・順・階層がそろっている', () => {
+  const levels = (text) => [...text.matchAll(/^(#{1,3}) /gm)].map((m) => m[1].length);
+  const ja = levels(readme);
+  const en = levels(readmeEn);
+  assert.ok(ja.length >= 30, `見出しが ${ja.length} 個しかない`);
+  assert.deepEqual(en, ja, `見出しの数か階層が違う（ja ${ja.length} / en ${en.length}）`);
+});
+
+test('英語版に日本語の本文が残っていない', () => {
+  const body = readmeEn
+    .split('\n')
+    // 手紙の原文と、日本語の用語をそのまま示す行は対象から外す
+    .filter((line) => !line.includes('README.md') && !line.includes('日本語')
+      && !line.includes('冗字暗号') && !line.includes('Angou Taizen'))
+    .join('\n');
+  const hits = [...body.matchAll(/[぀-ヿ一-鿿]+/g)].map((m) => m[0]);
+  assert.deepEqual(hits, [], `日本語が残っている: ${hits.slice(0, 5).join(' / ')}`);
+});
+
+test('両方のREADMEが互いにリンクしている', () => {
+  assert.match(readme, /^\[English\]\(README\.en\.md\) · 日本語$/m);
+  assert.match(readmeEn, /^English · \[日本語\]\(README\.md\)$/m);
+  // YAML メタデータは日本語版だけに置く（hackinglab.online が読むのは README.md）
+  assert.doesNotMatch(readmeEn, /^id: day069$/m);
+});
+
+test('英語版の画像がすべて実在し、英語の画面である', () => {
+  const imgs = [...readmeEn.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
+  const local = imgs.filter((u) => !u.startsWith('http'));
+  assert.equal(local.length, 5, `画像の参照が ${local.length} 件`);
+  for (const rel of local) {
+    assert.ok(rel.startsWith('assets/en/'), `英語版は英語の画面を使う: ${rel}`);
+    assert.ok(fs.existsSync(new URL(rel, ROOT)), `${rel} がない`);
+  }
+});
+
+test('英語版も、本ツールの数え方の違いの例が実装と合っている', () => {
+  // 「打ち切る／打ち切らない」の表の値を、計算部で確かめる
+  const sample = 'ab, cd. ef, ghijk';
+  const stop = C.extract(sample, { puncts: ',.', offset: 3, countMode: 'nonSpace', mode: 'stop' });
+  const skip = C.extract(sample, { puncts: ',.', offset: 3, countMode: 'nonSpace', mode: 'skip' });
+  assert.ok(readmeEn.includes(`| \`${sample}\` (third character, spaces not counted) | \`${stop.message}\` | \`${skip.message}\` |`),
+    `英語版の表が ${stop.message} / ${skip.message} と合っていない`);
+  assert.ok(readme.includes(`| \`${sample}\`（3文字目・空白を数えない） | \`${stop.message}\` | \`${skip.message}\` |`),
+    `日本語版の表が ${stop.message} / ${skip.message} と合っていない`);
+});
+
 const NG = [
   [/サーバ(?![ーイ])/, 'サーバー'],
   [/ユーザ(?![ー])/, 'ユーザー'],

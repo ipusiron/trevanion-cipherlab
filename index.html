@@ -5,31 +5,33 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
   <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Trevanion CipherLab</title>
+  <meta name="description" content="トレヴァニオン暗号（Null暗号の一種）の可視化・学習ツール。句読点の直後から数えて何文字目を拾うかを変えながら、隠された文を取り出せます。規則の総当たりと、逸話の出典の検討つき。" />
+  <title>Trevanion CipherLab - トレヴァニオン暗号ツール</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <header class="app-header">
     <h1>Trevanion CipherLab</h1>
-    <p class="subtitle">トレヴァニオン暗号（Null暗号の一種）の可視化・学習ツール</p>
+    <p class="subtitle" data-i18n="ui.subtitle">トレヴァニオン暗号（Null暗号の一種）の可視化・学習ツール</p>
+    <button id="lang-toggle" class="lang-toggle" data-i18n="ui.langButton" data-i18n-attr="aria-label:ui.langLabel">English</button>
   </header>
 
   <main class="container">
-    <nav class="tabs" role="tablist" aria-label="Main Tabs">
-      <button class="tab-btn active" id="tab-btn-basic" data-tab="basic" role="tab" aria-selected="true" aria-controls="basic" tabindex="0">トレヴァニオン暗号の基本</button>
-      <button class="tab-btn" id="tab-btn-encrypt" data-tab="encrypt" role="tab" aria-selected="false" aria-controls="encrypt" tabindex="-1">暗号化（隠蔽化）</button>
-      <button class="tab-btn" id="tab-btn-decrypt" data-tab="decrypt" role="tab" aria-selected="false" aria-controls="decrypt" tabindex="-1">復号（可視化）</button>
-      <button class="tab-btn" id="tab-btn-study" data-tab="study" role="tab" aria-selected="false" aria-controls="study" tabindex="-1">Null暗号の座学</button>
+    <nav class="tabs" role="tablist" data-i18n-attr="aria-label:ui.tablist">
+      <button class="tab-btn active" id="tab-btn-basic" data-tab="basic" role="tab" aria-selected="true" aria-controls="basic" data-i18n="tab.basic" tabindex="0">トレヴァニオン暗号の基本</button>
+      <button class="tab-btn" id="tab-btn-encrypt" data-tab="encrypt" role="tab" aria-selected="false" aria-controls="encrypt" data-i18n="tab.encrypt" tabindex="-1">暗号化（隠蔽化）</button>
+      <button class="tab-btn" id="tab-btn-decrypt" data-tab="decrypt" role="tab" aria-selected="false" aria-controls="decrypt" data-i18n="tab.decrypt" tabindex="-1">復号（可視化）</button>
+      <button class="tab-btn" id="tab-btn-study" data-tab="study" role="tab" aria-selected="false" aria-controls="study" data-i18n="tab.study" tabindex="-1">Null暗号の座学</button>
     </nav>
 
     <!-- 基本 -->
     <section id="basic" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-basic" tabindex="0">
-      <h2>トレヴァニオン暗号の基本</h2>
+      <h2 data-i18n="basic.heading">トレヴァニオン暗号の基本</h2>
 
       <details class="accordion" open>
-        <summary>概要</summary>
+        <summary data-i18n="basic.overview.summary">概要</summary>
         <div class="accordion-content">
-          <p>
+          <p data-i18n="basic.overview.body">
             <strong>トレヴァニオン暗号</strong>は、<strong>Null暗号（冗字暗号）</strong>の一種です。<br>
             表面的には自然な文章（カバーテキスト）ですが、<em>句読点の直後から数えて3文字目</em>を拾い集めると真のメッセージが現れます。
           </p>
@@ -37,20 +39,20 @@
       </details>
 
       <details class="accordion">
-        <summary>基本ルール</summary>
+        <summary data-i18n="basic.rule.summary">基本ルール</summary>
         <div class="accordion-content">
           <ul>
-            <li>句読点の集合（初期）：日本語「、。」／英語「, . ; : ! ? '」</li>
-            <li>数え方：句読点の<strong>直後から</strong>3文字目（空白を数えるかは設定で選択）</li>
+            <li data-i18n="basic.rule.puncts">句読点の集合（初期）：日本語「、。」／英語「, . ; : ! ? '」</li>
+            <li data-i18n="basic.rule.count">数え方：句読点の<strong>直後から</strong>3文字目（空白を数えるかは設定で選択）</li>
           </ul>
         </div>
       </details>
       
       <details class="accordion">
-        <summary>伝えられている逸話</summary>
+        <summary data-i18n="basic.anecdote.summary">伝えられている逸話</summary>
         <div class="accordion-content">
-          <p>この暗号には、次の逸話が伝えられています。</p>
-          <p>
+          <p data-i18n="basic.anecdote.lead">この暗号には、次の逸話が伝えられています。</p>
+          <p data-i18n="basic.anecdote.body">
             清教徒革命期、王党派のジョン・トレヴァニオンがコルチェスターの城に幽閉された。
             そこへ、R.T.と署名された一通の手紙が届く。一見するとただの慰めの手紙だが、
             句読点の直後から3文字目を順に拾うと
@@ -60,12 +62,12 @@
           <p>
             <em>"Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, ... Restinge your servant to command. R.T."</em>
           </p>
-          <p>
+          <p data-i18n="basic.anecdote.caveat">
             ただし、<strong>この話は一次史料にたどり着けません。</strong>
             下の「この逸話はどこまで確かめられるか」を開いてください。
             本ツールは、この手紙を題材として扱っています。
           </p>
-          <p>
+          <p data-i18n="basic.anecdote.doyle">
             コナン・ドイルの『グロリア・スコット号事件』にも隠し文の暗号が出てきますが、
             そちらは最初の語から<strong>3語ごとに語を拾う</strong>方式で、句読点を手がかりにする本方式とは別のものです。
           </p>
@@ -73,41 +75,41 @@
       </details>
 
       <details class="accordion">
-        <summary>この逸話はどこまで確かめられるか</summary>
+        <summary data-i18n="basic.verify.summary">この逸話はどこまで確かめられるか</summary>
         <div class="accordion-content">
-          <p>暗号史でよく紹介される話ですが、たどれる範囲は次のとおりです。</p>
+          <p data-i18n="basic.verify.lead">暗号史でよく紹介される話ですが、たどれる範囲は次のとおりです。</p>
           <ul>
-            <li>
+            <li data-i18n="basic.verify.oldest">
               <strong>いちばん古い記録は1853年の匿名の雑誌記事</strong>である
               （無署名「Cyphers」『The National Miscellany』第1巻、ロンドン、1853年、356〜357頁）。
               典拠は示されておらず、現在形の物語として書かれている。
               同じ記事の書き手は、直後の別の暗号の話について「正確な事実を述べるつもりはない。知らないからだ」と断っている
             </li>
-            <li>
+            <li data-i18n="basic.verify.chain">
               <strong>そこから引き写されて広まった。</strong>
               1863年の『Once a Week』→ 同年の『Harper's Weekly』→ 1868年のMyer『A Manual of Signals』
               （Myer自身が「Harper's Weekly から取った」と明記している）→ 1869年のBaring-Gould →
               1874年のBombaugh → Kahn『The Codebreakers』→ 現代。
               <strong>この系譜のどの資料も、一次史料を挙げていない</strong>
             </li>
-            <li>
+            <li data-i18n="basic.verify.contradiction">
               <strong>同時代の史料と合わない。</strong>
               クラレンドン伯『反乱史』が記すジョン・トレヴァニオンは、1643年7月のブリストル攻城戦で戦死した
               28歳未満の下院議員で、ナイトではない。コルチェスターの降伏は1648年8月で5年ずれる。
               降伏時に名簿から選ばれた3人（ルーカス、ライル、ガスコイン）のなかにも彼はいない。
               城そのものも「1648年の攻城戦ではほとんど役割を果たさなかった」とされる
             </li>
-            <li>
+            <li data-i18n="basic.verify.drift">
               <strong>伝わるうちに年代が壊れた例もある。</strong>
               1925年の雑誌記事は「ウィリアム・ピット首相の時代」と書いており、実際の1648年とは約135年離れている
             </li>
-            <li>
+            <li data-i18n="basic.verify.scholar">
               研究者の評価としては、友清理士が「真正性は確立していないように見える」
               「一次史料を引用する現代の著者はいないようだ」としつつ、
               「暗号そのものは、ただの作り話にしては凝りすぎている」とも述べている
             </li>
           </ul>
-          <p class="note">
+          <p class="note" data-i18n="basic.verify.note">
             作り話だと決めつけられるわけでもありません。ここで言えるのは
             「1853年より前にはさかのぼれず、同時代の史料とは合わない」というところまでです。
           </p>
@@ -115,9 +117,9 @@
       </details>
 
       <details class="accordion">
-        <summary>関連情報</summary>
+        <summary data-i18n="basic.related.summary">関連情報</summary>
         <div class="accordion-content">
-          <p>
+          <p data-i18n="basic.related.body">
             Null暗号の詳細は<strong>座学</strong>タブを参照してください。
           </p>
         </div>
@@ -126,132 +128,132 @@
 
     <!-- 暗号化（隠蔽化） -->
     <section id="encrypt" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-encrypt" tabindex="0">
-      <h2>暗号化</h2>
+      <h2 data-i18n="enc.heading">暗号化</h2>
 
       <!-- サブタブ -->
-      <nav class="sub-tabs" role="tablist" aria-label="Encrypt Sub Tabs">
-        <button class="sub-tab-btn active" data-subtab="generate-support" role="tab" aria-selected="true">生成支援</button>
-        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false">自動生成（実験的）</button>
+      <nav class="sub-tabs" role="tablist" data-i18n-attr="aria-label:enc.subtablist">
+        <button class="sub-tab-btn active" data-subtab="generate-support" role="tab" aria-selected="true" data-i18n="enc.subtab.support">生成支援</button>
+        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false" data-i18n="enc.subtab.auto">自動生成（実験的）</button>
       </nav>
 
       <!-- 生成支援サブタブ -->
-      <div id="generate-support" class="sub-tab-panel active" role="tabpanel" aria-label="生成支援">
-        <h3>制約チェック＆ヒント</h3>
-        <p class="note">
+      <div id="generate-support" class="sub-tab-panel active" role="tabpanel" data-i18n-attr="aria-label:enc.subtab.support">
+        <h3 data-i18n="enc.support.heading">制約チェック＆ヒント</h3>
+        <p class="note" data-i18n="enc.support.note">
           自然な文章を自動生成するのは難度が高いため、ここでは
           <strong>「カバーテキスト案」</strong>に対して
           <strong>「各句読点のn文字目が満たすべき文字」</strong>を可視化し、不一致箇所を指摘します。
         </p>
 
         <div class="controls">
-          <label for="enc-plain">隠したいメッセージ（平文）</label>
-          <textarea id="enc-plain" rows="2" placeholder="例：HELLO または こんにちは"></textarea>
+          <label for="enc-plain" data-i18n="enc.plain.label">隠したいメッセージ（平文）</label>
+          <textarea id="enc-plain" rows="2" placeholder="例：HELLO または こんにちは" data-i18n-attr="placeholder:enc.plain.placeholder"></textarea>
 
           <div class="processing-target">
-            <label>処理対象文字列（アルファベットのみ）：</label>
+            <label data-i18n="enc.target.label">処理対象文字列（アルファベットのみ）：</label>
             <div id="enc-processing-text" class="processing-text-display"></div>
           </div>
 
-          <label for="enc-cover">カバーテキスト案（自然文）</label>
-          <textarea id="enc-cover" rows="6" placeholder="ここに自然な文章を書いて、句読点（、。,.!?;:）の3文字後に平文の各文字が並ぶように調整します。"></textarea>
+          <label for="enc-cover" data-i18n="enc.cover.label">カバーテキスト案（自然文）</label>
+          <textarea id="enc-cover" rows="6" placeholder="ここに自然な文章を書いて、句読点（、。,.!?;:）の3文字後に平文の各文字が並ぶように調整します。" data-i18n-attr="placeholder:enc.cover.placeholder"></textarea>
 
           <div class="opts">
-            <label for="puncts-input">句読点セット：</label>
+            <label for="puncts-input" data-i18n="opt.puncts">句読点セット：</label>
             <input type="text" id="puncts-input" value="、。,.!?;:'" />
-            <label for="enc-offset">オフセットn：</label>
+            <label for="enc-offset" data-i18n="opt.offset">オフセットn：</label>
             <input type="number" id="enc-offset" value="3" min="1" />
-            <label><input type="checkbox" id="count-spaces"> 空白も「文字数」に含める</label>
-            <button id="enc-check" class="primary">制約チェック</button>
+            <label><input type="checkbox" id="count-spaces"> <span data-i18n="opt.countSpaces">空白も「文字数」に含める</span></label>
+            <button id="enc-check" class="primary" data-i18n="enc.check">制約チェック</button>
           </div>
         </div>
 
         <div id="enc-report" class="report" aria-live="polite"></div>
-        <div id="enc-preview" class="preview" aria-label="ハイライトプレビュー"></div>
+        <div id="enc-preview" class="preview" data-i18n-attr="aria-label:enc.preview.label"></div>
 
         <details class="tips">
-          <summary>文章調整のコツ（ヒント）</summary>
+          <summary data-i18n="enc.tips.summary">文章調整のコツ（ヒント）</summary>
           <ul>
-            <li>句読点の位置は「平文の文字境界」を作るスイッチ。位置を増減して、3文字目に欲しい文字が来るよう語順を調整。</li>
-            <li>助詞・副詞・接続詞でリズムを作り、必要な箇所に3文字の余白（例：「が」「やはり」「しかし」など）を挿入。</li>
-            <li>日本語のかな・漢字・英数の混在で微調整しやすい（1文字カウントでズレを吸収）。</li>
-            <li>どうしても無理な場合は、平文の文字集合をローマ字化／英字置換するなどの工夫も有効。</li>
+            <li data-i18n="enc.tips.1">句読点の位置は「平文の文字境界」を作るスイッチ。位置を増減して、3文字目に欲しい文字が来るよう語順を調整。</li>
+            <li data-i18n="enc.tips.2">助詞・副詞・接続詞でリズムを作り、必要な箇所に3文字の余白（例：「が」「やはり」「しかし」など）を挿入。</li>
+            <li data-i18n="enc.tips.3">日本語のかな・漢字・英数の混在で微調整しやすい（1文字カウントでズレを吸収）。</li>
+            <li data-i18n="enc.tips.4">どうしても無理な場合は、平文の文字集合をローマ字化／英字置換するなどの工夫も有効。</li>
           </ul>
         </details>
       </div>
 
       <!-- 自動生成サブタブ -->
-      <div id="auto-generate" class="sub-tab-panel" role="tabpanel" aria-label="自動生成">
+      <div id="auto-generate" class="sub-tab-panel" role="tabpanel" data-i18n-attr="aria-label:auto.heading">
 
-        <div class="warn-box">
+        <div class="warn-box" data-i18n="auto.warn">
           <strong>この機能は実験的です。</strong>
           英語では、句読点の直後に置かれるのが接続詞のほうになるため、狙った文字が抽出位置にそろうのは偶然に頼っています。
           日本語では規則は満たせますが、隠したい文字がそのまま見える形になりやすく、カバーテキストとしては不自然です。
           確実に作るなら、「生成支援」タブで自分で書いて制約チェックにかけてください。
         </div>
-        <h3>自動生成</h3>
-        <p class="note">
+        <h3 data-i18n="auto.heading">自動生成</h3>
+        <p class="note" data-i18n="auto.note">
           平文を入力すると、トレヴァニオン暗号のカバーテキストを自動生成します。
           複数の候補から選択できます。
         </p>
 
         <div class="controls">
-          <label for="auto-plain">隠したいメッセージ（平文）</label>
-          <textarea id="auto-plain" rows="2" placeholder="例：HELLO または SECRET"></textarea>
+          <label for="auto-plain" data-i18n="enc.plain.label">隠したいメッセージ（平文）</label>
+          <textarea id="auto-plain" rows="2" placeholder="例：HELLO または SECRET" data-i18n-attr="placeholder:auto.plain.placeholder"></textarea>
 
           <div class="processing-target">
-            <label>処理対象文字列（アルファベットのみ）：</label>
+            <label data-i18n="enc.target.label">処理対象文字列（アルファベットのみ）：</label>
             <div id="auto-processing-text" class="processing-text-display"></div>
           </div>
 
           <div class="opts">
-            <label for="auto-puncts">句読点セット：</label>
+            <label for="auto-puncts" data-i18n="opt.puncts">句読点セット：</label>
             <input type="text" id="auto-puncts" value="、。,.!?;:'" />
-            <label for="auto-offset">オフセットn：</label>
+            <label for="auto-offset" data-i18n="opt.offset">オフセットn：</label>
             <input type="number" id="auto-offset" value="3" min="1" max="10" />
-            <label><input type="checkbox" id="auto-count-spaces"> 空白も「文字数」に含める</label>
-            <label for="auto-style">文体：</label>
+            <label><input type="checkbox" id="auto-count-spaces"> <span data-i18n="opt.countSpaces">空白も「文字数」に含める</span></label>
+            <label for="auto-style" data-i18n="auto.style.label">文体：</label>
             <select id="auto-style">
-              <option value="formal">丁寧（formal）</option>
-              <option value="casual">カジュアル</option>
-              <option value="literary">文語調</option>
+              <option value="formal" data-i18n="auto.style.formal">丁寧（formal）</option>
+              <option value="casual" data-i18n="auto.style.casual">カジュアル</option>
+              <option value="literary" data-i18n="auto.style.literary">文語調</option>
             </select>
-            <button id="auto-generate-btn" class="primary">🤖 通常生成</button>
+            <button id="auto-generate-btn" class="primary" data-i18n="auto.run">🤖 通常生成</button>
           </div>
         </div>
 
         <!-- 完全一致探索機能 -->
         <details class="perfect-search-section">
-          <summary>🎯 完全一致候補の探索機能</summary>
+          <summary data-i18n="auto.search.summary">🎯 完全一致候補の探索機能</summary>
           <div class="perfect-search-content">
             <div class="warning-box">
-              <h4>⚠️ 使用前の注意事項</h4>
+              <h4 data-i18n="auto.search.cautionHeading">⚠️ 使用前の注意事項</h4>
               <ul>
-                <li><strong>無限ループの可能性</strong>：平文によっては完全一致候補が生成不可能な場合があります</li>
-                <li><strong>処理時間の不確定性</strong>：数秒から数分、場合によってはそれ以上かかる可能性があります</li>
-                <li><strong>メモリ使用量増加</strong>：大量の候補生成により一時的にメモリを消費します</li>
-                <li><strong>CPU負荷</strong>：連続生成によりデバイスの処理負荷が高くなります</li>
-                <li><strong>バッテリー消費</strong>：モバイルデバイスでのバッテリー消費が増加します</li>
-                <li><strong>安全装置</strong>：10万回試行後に自動停止します（設定変更可能）</li>
+                <li data-i18n="auto.search.caution.1"><strong>無限ループの可能性</strong>：平文によっては完全一致候補が生成不可能な場合があります</li>
+                <li data-i18n="auto.search.caution.2"><strong>処理時間の不確定性</strong>：数秒から数分、場合によってはそれ以上かかる可能性があります</li>
+                <li data-i18n="auto.search.caution.3"><strong>メモリ使用量増加</strong>：大量の候補生成により一時的にメモリを消費します</li>
+                <li data-i18n="auto.search.caution.4"><strong>CPU負荷</strong>：連続生成によりデバイスの処理負荷が高くなります</li>
+                <li data-i18n="auto.search.caution.5"><strong>バッテリー消費</strong>：モバイルデバイスでのバッテリー消費が増加します</li>
+                <li data-i18n="auto.search.caution.6"><strong>安全装置</strong>：10万回試行後に自動停止します（設定変更可能）</li>
               </ul>
             </div>
 
             <div class="perfect-search-controls">
-              <label for="target-perfect-count">目標完全一致数：<button type="button" class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数" aria-label="説明を表示">❓</button></label>
+              <label for="target-perfect-count"><span data-i18n="auto.search.targetLabel">目標完全一致数：</span><button type="button" class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数" aria-label="説明を表示" data-i18n-attr="data-tooltip:auto.search.targetHelp;aria-label:auto.search.helpLabel">❓</button></label>
               <input type="number" id="target-perfect-count" value="2" min="1" max="10" />
 
-              <label for="max-attempts">最大試行回数：</label>
+              <label for="max-attempts" data-i18n="auto.search.maxLabel">最大試行回数：</label>
               <input type="number" id="max-attempts" value="100000" min="1000" max="500000" step="10000" />
 
               <div class="search-buttons">
-                <button id="start-perfect-search" class="primary">🎯 完全一致探索開始</button>
-                <button id="pause-perfect-search" class="secondary" hidden>⏸️ 一時停止</button>
-                <button id="stop-perfect-search" class="secondary" hidden>⏹️ 完全停止</button>
+                <button id="start-perfect-search" class="primary" data-i18n="auto.search.start">🎯 完全一致探索開始</button>
+                <button id="pause-perfect-search" class="secondary" hidden data-i18n="auto.search.pause">⏸️ 一時停止</button>
+                <button id="stop-perfect-search" class="secondary" hidden data-i18n="auto.search.stop">⏹️ 完全停止</button>
               </div>
             </div>
 
             <div id="search-progress" class="search-progress" hidden>
               <div class="progress-header">
-                <h4>🔍 探索中...</h4>
+                <h4 data-i18n="auto.search.progressHeading">🔍 探索中...</h4>
                 <div class="progress-stats">
                   <span id="attempts-count">試行回数: 0</span>
                   <span id="perfect-found">完全一致: 0</span>
@@ -267,21 +269,21 @@
         </details>
 
         <div id="auto-results" class="auto-results" hidden>
-          <h4>生成結果</h4>
+          <h4 data-i18n="auto.results.heading">生成結果</h4>
           <div class="generation-info">
             <span id="auto-info" class="generation-stats"></span>
-            <button id="auto-regenerate" class="secondary">🔄 再生成</button>
+            <button id="auto-regenerate" class="secondary" data-i18n="auto.regenerate">🔄 再生成</button>
           </div>
           <div id="auto-candidates" class="candidates-list"></div>
         </div>
 
         <div class="note note-spaced">
-          <strong>機能説明：</strong>
+          <strong data-i18n="auto.about.heading">機能説明：</strong>
           <ul>
-            <li>英語単語データベースに基づいて自動生成</li>
-            <li>各句読点のn文字目に平文の文字が配置されるように調整</li>
-            <li>生成されたテキストは「生成支援」タブで検証可能</li>
-            <li>現在は英語対応、日本語は今後対応予定</li>
+            <li data-i18n="auto.about.1">英語単語データベースに基づいて自動生成</li>
+            <li data-i18n="auto.about.2">各句読点のn文字目に平文の文字が配置されるように調整</li>
+            <li data-i18n="auto.about.3">生成されたテキストは「生成支援」タブで検証可能</li>
+            <li data-i18n="auto.about.4">現在は英語対応、日本語は今後対応予定</li>
           </ul>
         </div>
       </div>
@@ -289,31 +291,31 @@
 
     <!-- 復号（可視化） -->
     <section id="decrypt" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-decrypt" tabindex="0">
-      <h2>復号（可視化）</h2>
+      <h2 data-i18n="dec.heading">復号（可視化）</h2>
 
       <div class="controls">
-        <label for="dec-text">対象テキスト</label>
-        <textarea id="dec-text" rows="8" placeholder="ここにカバーテキスト（自然文）を貼り付け">Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, cannot much, I fear me, help you now. That I would saye to you, is this only: if ever I may be able to requite that I do owe you, stand not upon asking me. 'Tis not much that I can do: but what I can do, bee ye verie sure I wille. I knowe that, if dethe comes, if ordinary men fear it, it frights not you, accounting it for a high honour, to have such a rewarde of your loyalty. Pray yet that you may be spared this soe bitter, cup. I fear not that you will grudge any sufferings; only if bie submission you can turn them away, 'tis the part of a wise man. Tell me, an if you can, to do for you anythinge that you wolde have done. The general goes back on Wednesday. Restinge your servant to command. R.T.</textarea>
+        <label for="dec-text" data-i18n="dec.text.label">対象テキスト</label>
+        <textarea id="dec-text" rows="8" placeholder="ここにカバーテキスト（自然文）を貼り付け" data-i18n-attr="placeholder:dec.text.placeholder">Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, cannot much, I fear me, help you now. That I would saye to you, is this only: if ever I may be able to requite that I do owe you, stand not upon asking me. 'Tis not much that I can do: but what I can do, bee ye verie sure I wille. I knowe that, if dethe comes, if ordinary men fear it, it frights not you, accounting it for a high honour, to have such a rewarde of your loyalty. Pray yet that you may be spared this soe bitter, cup. I fear not that you will grudge any sufferings; only if bie submission you can turn them away, 'tis the part of a wise man. Tell me, an if you can, to do for you anythinge that you wolde have done. The general goes back on Wednesday. Restinge your servant to command. R.T.</textarea>
 
         <div class="opts">
-          <label for="dec-puncts">句読点セット：</label>
+          <label for="dec-puncts" data-i18n="opt.puncts">句読点セット：</label>
           <input type="text" id="dec-puncts" value="、。,.!?;:'" />
-          <label for="dec-offset">オフセットn（句読点の直後から何文字目を拾うか）：</label>
+          <label for="dec-offset" data-i18n="dec.offset.label">オフセットn（句読点の直後から何文字目を拾うか）：</label>
           <input type="number" id="dec-offset" value="3" min="1" />
-          <label for="dec-count-mode">何を1文字と数えるか：</label>
+          <label for="dec-count-mode" data-i18n="dec.countMode.label">何を1文字と数えるか：</label>
           <select id="dec-count-mode">
-            <option value="nonSpace">空白以外（標準）</option>
-            <option value="all">空白も数える</option>
-            <option value="alnum">英数字・かなだけ</option>
+            <option value="nonSpace" data-i18n="dec.countMode.nonSpace">空白以外（標準）</option>
+            <option value="all" data-i18n="dec.countMode.all">空白も数える</option>
+            <option value="alnum" data-i18n="dec.countMode.alnum">英数字・かなだけ</option>
           </select>
-          <label for="dec-mode">数える途中で句読点に当たったら：</label>
+          <label for="dec-mode" data-i18n="dec.mode.label">数える途中で句読点に当たったら：</label>
           <select id="dec-mode">
-            <option value="stop">そこで打ち切る（標準）</option>
-            <option value="skip">飛ばして数え続ける</option>
-            <option value="count">句読点も1文字と数える</option>
+            <option value="stop" data-i18n="dec.mode.stop">そこで打ち切る（標準）</option>
+            <option value="skip" data-i18n="dec.mode.skip">飛ばして数え続ける</option>
+            <option value="count" data-i18n="dec.mode.count">句読点も1文字と数える</option>
           </select>
-          <button id="dec-run" class="primary">ハイライト＆抽出</button>
-          <button id="dec-sweep" class="secondary">規則を総当たり</button>
+          <button id="dec-run" class="primary" data-i18n="dec.run">ハイライト＆抽出</button>
+          <button id="dec-sweep" class="secondary" data-i18n="dec.sweep">規則を総当たり</button>
         </div>
       </div>
 
@@ -321,20 +323,20 @@
         <div>
           <div id="dec-sweep-result" class="sweep-result" hidden></div>
 
-      <h3>ハイライト表示</h3>
+          <h3 data-i18n="dec.highlight.heading">ハイライト表示</h3>
           <div id="dec-highlight" class="highlight-box"></div>
         </div>
         <div class="result-section">
           <div class="result-header">
-            <h3>抽出結果</h3>
-            <button id="copy-result" class="copy-btn" title="結果をコピー">📋 コピー</button>
+            <h3 data-i18n="dec.result.heading">抽出結果</h3>
+            <button id="copy-result" class="copy-btn" title="結果をコピー" data-i18n="dec.copy" data-i18n-attr="title:dec.copy.title">📋 コピー</button>
           </div>
           <div id="dec-result" class="result-box" aria-live="polite"></div>
 
           <p id="dec-segmented" class="segmented" hidden></p>
 
           <p class="handoff">
-            <a id="dec-to-frequency" href="https://ipusiron.github.io/frequency-analyzer/" target="_blank" rel="noopener noreferrer">
+            <a id="dec-to-frequency" href="https://ipusiron.github.io/frequency-analyzer/" target="_blank" rel="noopener noreferrer" data-i18n="dec.handoff">
               取り出した文を Frequency Analyzer で調べる
             </a>
           </p>
@@ -344,23 +346,23 @@
 
     <!-- 座学 -->
     <section id="study" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-study" tabindex="0">
-      <h2>Null暗号の座学</h2>
+      <h2 data-i18n="study.heading">Null暗号の座学</h2>
 
       <details class="accordion" open>
-        <summary>Null暗号（冗字暗号）の定義</summary>
+        <summary data-i18n="study.def.summary">Null暗号（冗字暗号）の定義</summary>
         <div class="accordion-content">
-          <p>
+          <p data-i18n="study.def.body1">
             <strong>Null暗号（Null cipher）</strong> とは、自然文に見えるテキストから、
             あらかじめ決められた規則で文字を抜き出すことで真のメッセージを得る方式です。
             意味を持たない部分を「冗字（null）」と呼びます。
             一見して普通の文章に見えるため、暗号文だと気づかれにくく、検閲を避ける目的で使われました。
           </p>
-          <p>
+          <p data-i18n="study.def.body2">
             この考え方は古く、ジョン・ウィルキンズ『Mercury, or the Secret and Swift Messenger』（1641年）の第8章が、
             章題そのもので「意図した意味に必要な数より多くの文字を使って秘密に書くこと」と定義しています。
             同じ章には、各行の頭文字を拾うアクロスティックや、カルダングリルも並べられています。
           </p>
-          <p class="note">
+          <p class="note" data-i18n="study.def.note">
             日本語では「冗字暗号」と呼ばれることがありますが、調べた範囲ではこの語の用例をほとんど見つけられませんでした。
             日本語の暗号史では、長田順行『暗号大全』の分類で言う<strong>分置式</strong>がこの系統にあたります。
           </p>
@@ -368,54 +370,54 @@
       </details>
 
       <details class="accordion">
-        <summary>Null暗号の仕組み</summary>
+        <summary data-i18n="study.how.summary">Null暗号の仕組み</summary>
         <div class="accordion-content">
           <ul>
-            <li>少数の選ばれた単語や文字だけに注目し、それ以外は「冗字（null, dummy letters／捨て字）」として意味を持たない。</li>
-            <li>規則の例：
+            <li data-i18n="study.how.1">少数の選ばれた単語や文字だけに注目し、それ以外は「冗字（null, dummy letters／捨て字）」として意味を持たない。</li>
+            <li><span data-i18n="study.how.2">規則の例：</span>
               <ul>
-                <li>コンマの後の最初の文字を拾う</li>
-                <li>一段落内の5語目の後の4文字を拾う</li>
-                <li>新しい段落の直前の単語を拾う</li>
+                <li data-i18n="study.how.2a">コンマの後の最初の文字を拾う</li>
+                <li data-i18n="study.how.2b">一段落内の5語目の後の4文字を拾う</li>
+                <li data-i18n="study.how.2c">新しい段落の直前の単語を拾う</li>
               </ul>
             </li>
-            <li>トレヴァニオン暗号では「<strong>句読点の直後から数えて3文字目</strong>」というルールを用いる。</li>
+            <li data-i18n="study.how.3">トレヴァニオン暗号では「<strong>句読点の直後から数えて3文字目</strong>」というルールを用いる。</li>
           </ul>
         </div>
       </details>
 
       <details class="accordion">
-        <summary>Null暗号の特徴</summary>
+        <summary data-i18n="study.feature.summary">Null暗号の特徴</summary>
         <div class="accordion-content">
           <ul>
-            <li>転置や置換は行わず、文字は本文中にそのまま存在する。</li>
-            <li>自然な文章に溶け込ませるため、<strong>ステガノグラフィー（情報隠蔽）</strong>の性質を備える。</li>
-            <li>情報量は少なく効率は悪いが、暗号を使っていること自体を隠せる。</li>
+            <li data-i18n="study.feature.1">転置や置換は行わず、文字は本文中にそのまま存在する。</li>
+            <li data-i18n="study.feature.2">自然な文章に溶け込ませるため、<strong>ステガノグラフィー（情報隠蔽）</strong>の性質を備える。</li>
+            <li data-i18n="study.feature.3">情報量は少なく効率は悪いが、暗号を使っていること自体を隠せる。</li>
           </ul>
         </div>
       </details>
 
       <details class="accordion">
-        <summary>Null暗号文の作り方（簡易版）</summary>
+        <summary data-i18n="study.make.summary">Null暗号文の作り方（簡易版）</summary>
         <div class="accordion-content">
           <ol>
-            <li>紙を縦に二つ折り（や三つ折り）にする。</li>
-            <li>折り目に沿って縦にメッセージ（平文）を書く。</li>
-            <li>折り目を開き、その前後を冗字で埋めて自然な文章に仕立てる。</li>
+            <li data-i18n="study.make.1">紙を縦に二つ折り（や三つ折り）にする。</li>
+            <li data-i18n="study.make.2">折り目に沿って縦にメッセージ（平文）を書く。</li>
+            <li data-i18n="study.make.3">折り目を開き、その前後を冗字で埋めて自然な文章に仕立てる。</li>
           </ol>
-          <p>→ 受け取った側は、折り目に沿って縦に読むことで平文を復元できる。</p>
+          <p data-i18n="study.make.close">→ 受け取った側は、折り目に沿って縦に読むことで平文を復元できる。</p>
         </div>
       </details>
 
       <details class="accordion">
-        <summary>Null暗号文の識別のヒント</summary>
+        <summary data-i18n="study.detect.summary">Null暗号文の識別のヒント</summary>
         <div class="accordion-content">
           <ul>
-            <li>不自然に冗長、または堅苦しい言葉遣いがある。</li>
-            <li>一定間隔や特定位置に意味のある文字列が現れる。</li>
+            <li data-i18n="study.detect.1">不自然に冗長、または堅苦しい言葉遣いがある。</li>
+            <li data-i18n="study.detect.2">一定間隔や特定位置に意味のある文字列が現れる。</li>
           </ul>
-          <p>→ こうした特徴がある文章はNull暗号文の可能性がある。</p>
-          <p class="note">
+          <p data-i18n="study.detect.close">→ こうした特徴がある文章はNull暗号文の可能性がある。</p>
+          <p class="note" data-i18n="study.detect.note">
             米国の検閲局が1946年にまとめた報告は、隠しメッセージを含む手紙について
             「文面が本物らしく響かない。自然さを欠き、人がある考えに置くはずの強調が抜け落ちている」と書いています
             （Friedman &amp; Callimahos『Military Cryptanalytics Part I』par.83 に引用）。
@@ -424,21 +426,21 @@
       </details>
 
       <details class="accordion">
-        <summary>Null暗号の歴史的背景と応用</summary>
+        <summary data-i18n="study.history.summary">Null暗号の歴史的背景と応用</summary>
         <div class="accordion-content">
           <ul>
-            <li>古くからスパイや囚人の密書で利用され、検閲を欺くために活用された。</li>
-            <li>
+            <li data-i18n="study.history.1">古くからスパイや囚人の密書で利用され、検閲を欺くために活用された。</li>
+            <li data-i18n="study.history.2">
               第二次世界大戦中、米国の郵便検閲は<strong>国際チェスの対局</strong>のようなやりとりも止めねばならなかったと、
               検閲局の報告（1945年、22頁）に記されている。隠す媒体としては、ほかに地図・楽譜・買い物リスト・株価などが挙げられている
               （Friedman &amp; Callimahos, par.83）
             </li>
-            <li>
+            <li data-i18n="study.history.3">
               暗号（cryptography）が内容を守るのに対し、ステガノグラフィーは<strong>存在そのものを隠す</strong>ものだと整理される
               （Petitcolas ほか「Information Hiding — A Survey」1999年）
             </li>
-            <li>現代では「隠しメッセージ」「ステガノグラフィー」の原型として扱われ、教育や歴史研究で取り上げられている。</li>
-            <li>Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener noreferrer">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
+            <li data-i18n="study.history.4">現代では「隠しメッセージ」「ステガノグラフィー」の原型として扱われ、教育や歴史研究で取り上げられている。</li>
+            <li data-i18n="study.history.5">Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener noreferrer">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
           </ul>
         </div>
       </details>
@@ -447,9 +449,9 @@
 
   <footer>
     <div class="footer">
-      🔗 GitHubリポジトリーはこちら（
+      <span data-i18n="ui.repo">🔗 GitHubリポジトリーはこちら（</span>
       <a href="https://github.com/ipusiron/trevanion-cipherlab" target="_blank" rel="noopener noreferrer">ipusiron/trevanion-cipherlab</a>
-      ）
+      <span data-i18n="ui.repoClose">）</span>
     </div>
   </footer>
 
@@ -457,8 +459,9 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
 
+  <script src="./js/messages.js"></script>
+  <script src="./js/i18n.js"></script>
   <script src="./js/trevanion-words.js"></script>
-
   <script src="./js/trevanion-core.js"></script>
   <script src="./script.js"></script>
 </body>

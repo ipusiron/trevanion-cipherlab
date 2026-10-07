@@ -35,6 +35,8 @@ hub: true
 ---
 -->
 
+[English](README.en.md) · 日本語
+
 # Trevanion CipherLab - トレヴァニオン暗号支援ツール
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/ipusiron/trevanion-cipherlab?style=social)
@@ -142,7 +144,6 @@ hub: true
 - クロノグラム
 - アクロスティック
 - 各句読点の後の何番目かの文字を読み込む…例：トレヴァニオン暗号、コナン・ドイルの『グロリア・スコット号事件』に登場する暗号
-- 
 
 ### Null暗号文の作り方（例）
 1. 紙を縦に3つ折りにする。  
@@ -289,12 +290,15 @@ trevanion-cipherlab/
 ├── script.js               # 画面側の処理（入力の読み取り・表示・タブ・生成）
 ├── style.css               # 配色とレイアウト（狭い画面への対応を含む）
 ├── js/                     # スクリプト
+│   ├── messages.js         # 画面の文言（日本語・英語で同じキーを持つ辞書）
+│   ├── i18n.js             # 言語の選択と、data-i18n を書いた要素の差し替え
 │   ├── trevanion-core.js   # 計算部（抽出・制約チェック・総当たり・分かち書き。DOMを使わない）
 │   └── trevanion-words.js  # 分かち書きに使う英単語の小さな辞書
 ├── test/                   # テスト（node --test で実行する）
 │   ├── load.js             # 画面と同じスクリプトの読み込みと、照合用の参照実装
 │   ├── core.test.js        # 計算部（逸話の手紙・3つの数え方・制約チェック・境界）
 │   ├── html.test.js        # index.html の静的な検査（CSP・id・aria・外部参照）
+│   ├── i18n.test.js        # 日英の辞書と画面の文言の対応
 │   ├── contrast.test.js    # 配色のコントラスト比と、狭い画面での折り返し
 │   ├── readme.test.js      # README と ENCRYPTION.md の記述を実装と突き合わせる
 │   └── format.test.js      # 1行に詰め込んでいないか、計算部がDOMを使っていないか
@@ -312,14 +316,21 @@ trevanion-cipherlab/
 │   ├── screenshot2.png     # スクリーンショット（基本タブ・逸話の検証）
 │   ├── screenshot3.png     # スクリーンショット（暗号化タブ・制約チェック）
 │   ├── screenshot4.png     # スクリーンショット（座学タブ）
-│   └── screenshot5.png     # スクリーンショット（規則の総当たり）
+│   ├── screenshot5.png     # スクリーンショット（規則の総当たり）
+│   └── en/                 # 英語の画面のスクリーンショット
+│       ├── screenshot.png  # スクリーンショット（復号タブ）
+│       ├── screenshot2.png # スクリーンショット（基本タブ）
+│       ├── screenshot3.png # スクリーンショット（暗号化タブ）
+│       ├── screenshot4.png # スクリーンショット（座学タブ）
+│       └── screenshot5.png # スクリーンショット（規則の総当たり）
 ├── package.json            # テストの実行設定（依存パッケージはない）
 ├── CLAUDE.md               # Claude Code 向けの案内
 ├── ENCRYPTION.md           # 暗号化の機能のくわしい説明
 ├── LICENSE                 # MITライセンス
 ├── .gitignore              # Git の除外設定
 ├── .nojekyll               # GitHub Pages で Jekyll を使わない指定
-└── README.md               # このファイル
+├── README.md               # このファイル
+└── README.en.md            # 英語版のREADME
 ```
 
 ---

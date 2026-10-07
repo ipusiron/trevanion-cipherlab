@@ -25,7 +25,8 @@ test('インラインの style 属性とイベントハンドラーがない', (
 
 test('スクリプトは計算部・画面の順に読み込む', () => {
   const srcs = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map((m) => m[1]);
-  assert.deepEqual(srcs, ['./js/trevanion-words.js', './js/trevanion-core.js', './script.js']);
+  assert.deepEqual(srcs, ['./js/messages.js', './js/i18n.js',
+    './js/trevanion-words.js', './js/trevanion-core.js', './script.js']);
   assert.equal(new Set(srcs).size, srcs.length, '同じスクリプトを2回読み込んでいる');
 });
 
@@ -43,7 +44,7 @@ test('タブとパネルが id で結ばれ、キーボードで移動できる'
 });
 
 test('ヘルプは button で、フォーカスでも読める', () => {
-  const help = html.match(/<button type="button" class="help-icon" data-tooltip="([^"]+)" aria-label="([^"]+)">/);
+  const help = html.match(/<button type="button" class="help-icon" data-tooltip="([^"]+)" aria-label="([^"]+)"/);
   assert.ok(help, 'ヘルプが button になっていない');
   assert.ok(help[1].length > 5);
   const css = read('style.css');
@@ -56,7 +57,7 @@ test('タブのラベルに「未実装」が残っていない', () => {
 
 test('自動生成が実験的であることを画面に書いてある', () => {
   assert.match(html, /自動生成（実験的）/);
-  assert.match(html, /<div class="warn-box">/);
+  assert.match(html, /<div class="warn-box"[^>]*>/);
   assert.match(html, /この機能は実験的です/);
 });
 
