@@ -60,7 +60,8 @@ test('自動生成が実験的であることを画面に書いてある', () =>
 });
 
 test('主要な要素の id がそろっている', () => {
-  const ids = ['dec-text', 'dec-puncts', 'dec-offset', 'dec-count-spaces', 'dec-run', 'dec-highlight', 'dec-result',
+  const ids = ['dec-text', 'dec-puncts', 'dec-offset', 'dec-count-mode', 'dec-mode', 'dec-run', 'dec-sweep',
+    'dec-sweep-result', 'dec-highlight', 'dec-result',
     'enc-plain', 'enc-cover', 'puncts-input', 'enc-offset', 'count-spaces', 'enc-check', 'enc-report', 'enc-preview',
     'auto-plain', 'auto-generate-btn', 'auto-results', 'auto-info', 'auto-candidates', 'toast'];
   for (const id of ids) assert.ok(html.includes(`id="${id}"`), `id="${id}" がない`);

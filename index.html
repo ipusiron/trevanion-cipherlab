@@ -300,14 +300,28 @@
           <input type="text" id="dec-puncts" value="、。,.!?;:'" />
           <label for="dec-offset">オフセットn（句読点の直後から何文字目を拾うか）：</label>
           <input type="number" id="dec-offset" value="3" min="1" />
-          <label><input type="checkbox" id="dec-count-spaces"> 空白も「文字数」に含める</label>
+          <label for="dec-count-mode">何を1文字と数えるか：</label>
+          <select id="dec-count-mode">
+            <option value="nonSpace">空白以外（標準）</option>
+            <option value="all">空白も数える</option>
+            <option value="alnum">英数字・かなだけ</option>
+          </select>
+          <label for="dec-mode">数える途中で句読点に当たったら：</label>
+          <select id="dec-mode">
+            <option value="stop">そこで打ち切る（標準）</option>
+            <option value="skip">飛ばして数え続ける</option>
+            <option value="count">句読点も1文字と数える</option>
+          </select>
           <button id="dec-run" class="primary">ハイライト＆抽出</button>
+          <button id="dec-sweep" class="secondary">規則を総当たり</button>
         </div>
       </div>
 
       <div class="vertical-layout">
         <div>
-          <h3>ハイライト表示</h3>
+          <div id="dec-sweep-result" class="sweep-result" hidden></div>
+
+      <h3>ハイライト表示</h3>
           <div id="dec-highlight" class="highlight-box"></div>
         </div>
         <div class="result-section">

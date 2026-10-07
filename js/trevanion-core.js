@@ -13,6 +13,13 @@
   const DEFAULT_MODE = 'stop';
   const MAX_OFFSET = 12;
 
+  // 何を1文字と数えるか。dCode も同じ3択を持つ
+  //   nonSpace : 空白以外を数える（逸話の手紙はこれ）
+  //   all      : 空白も数える
+  //   alnum    : 英数字と仮名だけを数える（記号も飛ばす）
+  const COUNT_MODES = ['nonSpace', 'all', 'alnum'];
+  const DEFAULT_COUNT_MODE = 'nonSpace';
+
   // 空白とみなす文字（全角空白を含む）
   function isSpace(ch) {
     return ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r' || ch === '　';
@@ -30,6 +37,13 @@
     return out;
   }
 
+  // その文字を1文字として数えるか
+  function counts(ch, countMode) {
+    if (countMode === 'all') return true;
+    if (countMode === 'alnum') return /[0-9A-Za-z\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]/.test(ch);
+    return !isSpace(ch);
+  }
+
   function containsJapanese(text) {
     return /[぀-ゟ゠-ヿ一-龯]/.test(String(text ?? ''));
   }
@@ -42,7 +56,11 @@
     const offset = Number.isInteger(opts.offset) && opts.offset >= 1 && opts.offset <= MAX_OFFSET
       ? opts.offset
       : DEFAULT_OFFSET;
-    const countSpaces = opts.countSpaces === true;
+    // countMode が指定されていればそれを使う。なければ従来の countSpaces から決める
+    const countMode = COUNT_MODES.includes(opts.countMode)
+      ? opts.countMode
+      : (opts.countSpaces === true ? 'all' : DEFAULT_COUNT_MODE);
+    const countSpaces = countMode === 'all';
     const mode = MODES.includes(opts.mode) ? opts.mode : DEFAULT_MODE;
 
     const pset = new Set([...puncts]);
@@ -60,7 +78,7 @@
           if (mode === 'stop') break;
           if (mode === 'skip') continue;
         }
-        if (!countSpaces && isSpace(c)) continue;
+        if (!counts(c, countMode)) continue;
         steps++;
         if (steps === offset) {
           hit = j;
@@ -75,7 +93,7 @@
       }
     }
 
-    return { message: chars.join(''), indices, missed, puncts, offset, countSpaces, mode };
+    return { message: chars.join(''), indices, missed, puncts, offset, countSpaces, countMode, mode };
   }
 
   // 平文とカバーテキストを突き合わせる。1文字ごとの状態と、全体が成り立つかを返す
@@ -134,14 +152,53 @@
     const maxOffset = Number.isInteger(opts.maxOffset) ? Math.min(opts.maxOffset, MAX_OFFSET) : MAX_OFFSET;
     const rows = [];
     for (let offset = 1; offset <= maxOffset; offset++) {
-      for (const countSpaces of [false, true]) {
+      for (const countMode of COUNT_MODES) {
         for (const mode of MODES) {
-          const r = extract(text, { puncts, offset, countSpaces, mode });
-          rows.push({ offset, countSpaces, mode, message: r.message, length: r.message.length });
+          const r = extract(text, { puncts, offset, countMode, mode });
+          rows.push({
+            offset,
+            countMode,
+            countSpaces: countMode === 'all',
+            mode,
+            message: r.message,
+            length: r.message.length,
+            score: likelihood(r.message),
+          });
         }
       }
     }
-    return rows;
+    // それらしい順に並べる。同点なら短いほうを後ろにする
+    return rows.sort((a, b) => b.score.score - a.score.score || b.length - a.length);
+  }
+
+  // 取り出した文字列の「言語らしさ」を0〜1で返す。
+  // よく使う2文字の並びがどれだけ含まれるかで測る（辞書を持たずに済ませる）
+  const EN_BIGRAMS = (
+    'th he in er an re on at en nd ti es or te of ed is it al ar '
+    + 'st to nt ng se ha as ou io le ve co me de hi ri ro ic ne ea ra ce li ch ll be ma si om ur'
+  ).split(' ');
+  const JA_BIGRAMS = (
+    'した する ます です ない こと もの から ので ては でも という にも とい うこ れる られ いる あり その この'
+  ).split(' ');
+
+  function likelihood(text) {
+    const s = String(text ?? '');
+    if (s.length < 2) return { score: 0, lang: 'unknown', hits: 0 };
+    const lower = s.toLowerCase();
+    const pairs = [];
+    for (let i = 0; i + 1 < lower.length; i++) pairs.push(lower.slice(i, i + 2));
+
+    const en = pairs.filter((x) => EN_BIGRAMS.includes(x)).length;
+    const ja = pairs.filter((x) => JA_BIGRAMS.includes(x)).length;
+    const kana = [...s].filter((c) => /[\u3040-\u309f\u30a0-\u30ff]/.test(c)).length / s.length;
+    const latin = [...s].filter((c) => /[a-zA-Z]/.test(c)).length / s.length;
+
+    // 英語は「よくある2文字の割合」、日本語は「かなの割合」も効かせる
+    const enScore = (en / pairs.length) * 0.8 + latin * 0.2;
+    const jaScore = (ja / pairs.length) * 0.5 + kana * 0.5;
+    return enScore >= jaScore
+      ? { score: Number(enScore.toFixed(4)), lang: 'en', hits: en }
+      : { score: Number(jaScore.toFixed(4)), lang: 'ja', hits: ja };
   }
 
   globalThis.TrevanionCore = {
@@ -150,8 +207,12 @@
     DEFAULT_MODE,
     MODES,
     MAX_OFFSET,
+    COUNT_MODES,
+    DEFAULT_COUNT_MODE,
     isSpace,
+    counts,
     normalizePuncts,
+    likelihood,
     containsJapanese,
     extract,
     checkConstraints,
