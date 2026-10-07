@@ -201,6 +201,36 @@
       : { score: Number(jaScore.toFixed(4)), lang: 'ja', hits: ja };
   }
 
+  // 取り出した文字列を語に切る（空白が入らないので、辞書で区切り直す）。
+  // 全体を辞書の語で分けられたときだけ返す。長い語を優先する（語の長さの二乗を足して最大にする）
+  const MAX_WORD = 16;
+
+  function segment(text, words) {
+    const src = String(text ?? '').toLowerCase().replace(/[^a-z]/g, '');
+    const list = words || (globalThis.TrevanionWords ? globalThis.TrevanionWords.en : []);
+    if (!src || !list.length) return null;
+    const set = new Set(list);
+    const best = new Array(src.length + 1).fill(null);
+    best[0] = { score: 0, from: -1, word: '' };
+    for (let i = 1; i <= src.length; i++) {
+      for (let j = Math.max(0, i - MAX_WORD); j < i; j++) {
+        if (!best[j]) continue;
+        const w = src.slice(j, i);
+        if (!set.has(w)) continue;
+        const score = best[j].score + w.length * w.length;
+        if (!best[i] || score > best[i].score) best[i] = { score, from: j, word: w };
+      }
+    }
+    if (!best[src.length]) return null;
+    const out = [];
+    let i = src.length;
+    while (i > 0) {
+      out.unshift(best[i].word);
+      i = best[i].from;
+    }
+    return out;
+  }
+
   globalThis.TrevanionCore = {
     DEFAULT_PUNCTS,
     DEFAULT_OFFSET,
@@ -213,6 +243,8 @@
     counts,
     normalizePuncts,
     likelihood,
+    segment,
+    MAX_WORD,
     containsJapanese,
     extract,
     checkConstraints,

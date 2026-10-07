@@ -94,6 +94,8 @@ hub: true
   入力テキストから**句読点→その3文字後**を自動抽出し、**ハイライト**付きで可視化・復元。縦レイアウトで見やすく表示、コピー機能付き。
   - **数え方を選べる**：何を1文字と数えるか（空白以外／空白も／英数字・かなだけ）、数える途中で句読点に当たったときの扱い（打ち切る／飛ばして続ける／句読点も数える）
   - **規則の総当たり**：オフセット1〜12 × 数え方3通り × 句読点の扱い3通りを試し、**英語・日本語らしさのスコア順**に並べる。行ごとの「この設定で見る」で、その規則の結果をそのまま画面に反映できる
+  - **分かち書き**：取り出した文字列には空白が入らないので、小さな英単語の辞書で区切り直す（`panelateastendofchapelslides` → `panel at east end of chapel slides`）。辞書にない語が混じると区切れないため、そのときは出さない
+  - **ほかのツールへ渡す**：取り出した文を [Frequency Analyzer](https://ipusiron.github.io/frequency-analyzer/)（Day009）で開けるリンクを出す。URLのハッシュに載せるので、サーバーへは送られない
 - **座学**
   Null暗号（冗字暗号）の定義・特徴、ステガノグラフィー／分置式暗号との関係（アコーディオン形式）、Day036「Hidden Message Challenge」へのリンク。 
 
@@ -287,7 +289,8 @@ trevanion-cipherlab/
 ├── script.js               # 画面側の処理（入力の読み取り・表示・タブ・生成）
 ├── style.css               # 配色とレイアウト（狭い画面への対応を含む）
 ├── js/                     # スクリプト
-│   └── trevanion-core.js   # 計算部（抽出・制約チェック・総当たり。DOMを使わない）
+│   ├── trevanion-core.js   # 計算部（抽出・制約チェック・総当たり・分かち書き。DOMを使わない）
+│   └── trevanion-words.js  # 分かち書きに使う英単語の小さな辞書
 ├── test/                   # テスト（node --test で実行する）
 │   ├── load.js             # 画面と同じスクリプトの読み込みと、照合用の参照実装
 │   ├── core.test.js        # 計算部（逸話の手紙・3つの数え方・制約チェック・境界）
@@ -334,6 +337,7 @@ trevanion-cipherlab/
 ### 自作ツール
 
 - [Hidden Message Challenge ― 分置式暗号の体験ツール](https://ipusiron.github.io/hidden-message-challenge/)（Day036）
+- [Frequency Analyzer](https://ipusiron.github.io/frequency-analyzer/)（Day009）— 取り出した文の文字の出現頻度を調べる。復号タブのリンクからそのまま渡せる
 
 ### ほかのツールとの違い
 

@@ -330,6 +330,14 @@
             <button id="copy-result" class="copy-btn" title="結果をコピー">📋 コピー</button>
           </div>
           <div id="dec-result" class="result-box" aria-live="polite"></div>
+
+          <p id="dec-segmented" class="segmented" hidden></p>
+
+          <p class="handoff">
+            <a id="dec-to-frequency" href="https://ipusiron.github.io/frequency-analyzer/" target="_blank" rel="noopener noreferrer">
+              取り出した文を Frequency Analyzer で調べる
+            </a>
+          </p>
         </div>
       </div>
     </section>
@@ -447,6 +455,9 @@
 
   <!-- トースト通知 -->
   <div id="toast" class="toast" aria-live="polite"></div>
+
+
+  <script src="./js/trevanion-words.js"></script>
 
   <script src="./js/trevanion-core.js"></script>
   <script src="./script.js"></script>
