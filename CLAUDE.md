@@ -74,3 +74,26 @@ The Trevanion cipher extracts the nth character after each punctuation mark:
 - Default offset: 3
 - Skips to next punctuation if fewer than n characters exist before it
 - Optional space counting toggle
+
+## Calculation layer (js/trevanion-core.js)
+
+Published as `globalThis.TrevanionCore`; it never touches the DOM, and the tests call it directly.
+
+- `extract(text, {puncts, offset, countSpaces, mode})` returns the characters, their positions, and the punctuation marks it could not read from. `mode` is the one real design decision here:
+  - `stop` (default): stop counting when another punctuation mark appears before the offset is reached
+  - `skip`: ignore punctuation and keep counting (this is what dCode does)
+  - `count`: count punctuation as a character
+- `checkConstraints(plaintext, covertext, options)` compares the two character by character
+- `sweep(text, options)` runs every combination of offset, space handling and mode
+
+**The two versions of the letter behave differently.** With the apostrophe version, only `stop` plus `'` in the punctuation set yields the hidden sentence; with the uppercase version without apostrophes, every mode works. Neither version works when spaces are counted. `test/core.test.js` pins all of this down.
+
+## Conventions
+
+- No dependencies, no build step, no CDN. Everything must keep working from `file://`
+- Write to the DOM with `textContent` or `escapeHtml`, never raw input in `innerHTML`
+- Keep the CSP meta as strict as it is. Inline `style` attributes are blocked by it, so toggle visibility with the `hidden` attribute (CSSOM property assignment is fine)
+- Colours used as text must stay at 4.5:1 or better; `test/contrast.test.js` enforces this
+- The auto-generation feature is **experimental and stays out of the headline feature list**. Its current design puts the connector, not the chosen word, right after the punctuation mark, so hits are accidental. Fixing that means building the sentence so the target letter lands at the offset position
+- The Trevanion anecdote has **no primary source**. Keep the hedging in index.html and README.md, and keep the citations (1853 *National Miscellany*, Clarendon, the transmission chain)
+- Japanese text: polite form in prose, plain form in bullet lists and tables; long vowel marks (サーバー, ブラウザー); no space between Japanese and Latin characters
