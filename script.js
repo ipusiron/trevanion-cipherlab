@@ -221,7 +221,10 @@ function renderHighlight(text, indices, puncts = ",.;:!?'、。") {
 const decText = document.getElementById('dec-text');               // 入力テキストエリア
 const decPuncts = document.getElementById('dec-puncts');           // 句読点設定フィールド
 const decOffset = document.getElementById('dec-offset');           // オフセット設定フィールド
-const decCountSpaces = document.getElementById('dec-count-spaces'); // 空白カウントチェックボックス
+const decCountMode = document.getElementById('dec-count-mode');   // 何を1文字と数えるか
+const decMode = document.getElementById('dec-mode');             // 句読点に当たったときの数え方
+const decSweep = document.getElementById('dec-sweep');           // 規則の総当たりボタン
+const decSweepResult = document.getElementById('dec-sweep-result'); // 総当たりの結果
 const decRun = document.getElementById('dec-run');               // 実行ボタン
 const decResult = document.getElementById('dec-result');           // 結果表示エリア
 const decHighlight = document.getElementById('dec-highlight');     // ハイライト表示エリア
@@ -235,10 +238,11 @@ decRun?.addEventListener('click', () => {
   const text = decText.value || '';
   const puncts = normalizePuncts(decPuncts.value || '、。,.!?;:\'');
   const offset = Math.max(1, parseInt(decOffset.value || '3', 10));
-  const countSpaces = !!decCountSpaces.checked;
+  const countMode = decCountMode.value;
+  const mode = decMode.value;
 
   // トレヴァニオン暗号の抽出実行
-  const { message, indices } = trevanionExtract(text, puncts, offset, countSpaces);
+  const { message, indices } = Core.extract(text, { puncts, offset, countMode, mode });
 
   // 結果の表示
   decResult.textContent = message;                                    // 抽出されたメッセージ
@@ -248,10 +252,88 @@ decRun?.addEventListener('click', () => {
   try {
     localStorage.setItem('tcl_puncts', puncts);
     localStorage.setItem('tcl_offset', String(offset));
-    localStorage.setItem('tcl_countspaces', countSpaces ? '1' : '0');
+    localStorage.setItem('tcl_countmode', countMode);
+    localStorage.setItem('tcl_mode', mode);
   } catch (e) {
     console.warn('LocalStorageの保存に失敗:', e);
   }
+});
+
+// 規則を総当たりして、それらしい順に並べる（どの設定で読めるかを探す助け）
+const COUNT_MODE_LABEL = { nonSpace: '空白以外', all: '空白も', alnum: '英数字・かなだけ' };
+const MODE_LABEL = { stop: '打ち切る', skip: '飛ばして続ける', count: '句読点も数える' };
+
+decSweep?.addEventListener('click', () => {
+  const text = decText.value || '';
+  const puncts = normalizePuncts(decPuncts.value || Core.DEFAULT_PUNCTS);
+  decSweepResult.replaceChildren();
+
+  if (!text.trim()) {
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = '対象テキストを入れてください。';
+    decSweepResult.append(p);
+    decSweepResult.hidden = false;
+    return;
+  }
+
+  const rows = Core.sweep(text, { puncts }).filter((r) => r.message.length > 0).slice(0, 20);
+
+  const head = document.createElement('p');
+  head.className = 'muted';
+  head.textContent = `オフセット1〜${Core.MAX_OFFSET} × 数え方3通り × 句読点の扱い3通りを試し、`
+    + `それらしい順に上位${rows.length}件を並べました。`;
+  decSweepResult.append(head);
+
+  const table = document.createElement('table');
+  table.className = 'sweep-table';
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  for (const label of ['#', 'オフセット', '数える対象', '句読点に当たったら', 'それらしさ', '取り出した文字']) {
+    const th = document.createElement('th');
+    th.textContent = label;
+    hr.append(th);
+  }
+  thead.append(hr);
+  table.append(thead);
+
+  const tbody = document.createElement('tbody');
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    const cells = [
+      String(i + 1),
+      String(r.offset),
+      COUNT_MODE_LABEL[r.countMode] || r.countMode,
+      MODE_LABEL[r.mode] || r.mode,
+      `${(r.score.score * 100).toFixed(0)}%`,
+      r.message.slice(0, 60),
+    ];
+    cells.forEach((v, j) => {
+      const td = document.createElement('td');
+      td.textContent = v;
+      if (j === 5) td.className = 'sweep-text';
+      tr.append(td);
+    });
+    // 押すと、その設定を画面に反映する
+    const td = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'secondary sweep-apply';
+    btn.textContent = 'この設定で見る';
+    btn.addEventListener('click', () => {
+      decOffset.value = String(r.offset);
+      decCountMode.value = r.countMode;
+      decMode.value = r.mode;
+      decRun.click();
+      decRun.scrollIntoView({ block: 'center' });
+    });
+    td.append(btn);
+    tr.append(td);
+    tbody.append(tr);
+  });
+  table.append(tbody);
+  decSweepResult.append(table);
+  decSweepResult.hidden = false;
 });
 
 /* ==========================================================================
@@ -265,12 +347,10 @@ decRun?.addEventListener('click', () => {
 function clearOldSettings() {
   localStorage.removeItem('tcl_puncts');
   localStorage.removeItem('tcl_offset');
-  localStorage.removeItem('tcl_countspaces');
+  localStorage.removeItem('tcl_countmode');
+  localStorage.removeItem('tcl_mode');
   location.reload();
 }
-
-// グローバルスコープに公開（デバッグ用）
-window.clearOldSettings = clearOldSettings;
 
 // 初期ロード時に設定復元
 window.addEventListener('DOMContentLoaded', ()=>{
@@ -282,7 +362,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   try{
     const p = localStorage.getItem('tcl_puncts');
     const o = localStorage.getItem('tcl_offset');
-    const s = localStorage.getItem('tcl_countspaces');
+    const cm = localStorage.getItem('tcl_countmode');
+    const m = localStorage.getItem('tcl_mode');
 
     // 句読点セットを設定（アポストロフィーが含まれていない古い設定を更新）
     let finalPuncts = p || defaultPuncts;
@@ -294,7 +375,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
     }
 
     if(o) decOffset.value = o;
-    if(s) decCountSpaces.checked = s === '1';
+    if (cm && [...decCountMode.options].some((o) => o.value === cm)) decCountMode.value = cm;
+    if (m && [...decMode.options].some((o) => o.value === m)) decMode.value = m;
   }catch(e){
     console.error('Error in DOMContentLoaded:', e);
   }

@@ -164,19 +164,55 @@ test('制約チェックは平文の空白を無視する', () => {
   assert.equal(r.expectedLength, 2);
 });
 
-test('総当たりは全部の組み合わせを返す', () => {
+test('総当たりは全部の組み合わせを返し、それらしい順に並べる', () => {
   const rows = C.sweep(LETTER_B, { puncts: ",.;:!?'", maxOffset: 5 });
-  assert.equal(rows.length, 5 * 2 * C.MODES.length);
+  assert.equal(rows.length, 5 * C.COUNT_MODES.length * C.MODES.length);
   const hit = rows.filter((r) => r.message.toLowerCase().replace(/[^a-z]/g, '') === HIDDEN);
-  // 版Bはどの数え方でも通るので、オフセット3・空白を数えない の3通りが当たる
-  assert.equal(hit.length, 3);
+  assert.ok(hit.length >= 3, `正解が ${hit.length} 件しかない`);
   for (const r of hit) {
     assert.equal(r.offset, 3);
-    assert.equal(r.countSpaces, false);
+    assert.notEqual(r.countMode, 'all');
   }
+  // スコアの高い順に並んでいる
+  for (let i = 1; i < rows.length; i++) assert.ok(rows[i - 1].score.score >= rows[i].score.score);
+  // 正解が上位に来る（dCode は順不同で、正解が5番目に埋もれていた）
+  const rank = rows.findIndex((r) => r.message.toLowerCase().replace(/[^a-z]/g, '') === HIDDEN);
+  assert.ok(rank < 3, `正解が ${rank + 1} 番目`);
 });
 
 test('総当たりの上限を超える指定は丸める', () => {
   const rows = C.sweep('a, bcdef', { maxOffset: 99 });
-  assert.equal(rows.length, C.MAX_OFFSET * 2 * C.MODES.length);
+  assert.equal(rows.length, C.MAX_OFFSET * C.COUNT_MODES.length * C.MODES.length);
+});
+
+test('数え方を3択から選べる', () => {
+  // 「ab, c d1e」で、空白と記号をどう数えるかで拾う文字が変わる
+  const text = 'ab, c d1e';
+  assert.equal(C.extract(text, { puncts: ',', offset: 3, countMode: 'nonSpace' }).message, '1');
+  assert.equal(C.extract(text, { puncts: ',', offset: 3, countMode: 'all' }).message, ' '); // 空白も1文字と数える
+  assert.equal(C.extract(text, { puncts: ',', offset: 3, countMode: 'alnum' }).message, '1');
+  // 記号を飛ばす違いが出る例
+  const sym = 'xy, a-b-c';
+  assert.equal(C.extract(sym, { puncts: ',', offset: 3, countMode: 'nonSpace' }).message, 'b');
+  assert.equal(C.extract(sym, { puncts: ',', offset: 3, countMode: 'alnum' }).message, 'c');
+});
+
+test('countSpaces の指定は countMode に読み替えられる（後方互換）', () => {
+  assert.equal(C.extract('a, bcdef', { puncts: ',', countSpaces: true }).countMode, 'all');
+  assert.equal(C.extract('a, bcdef', { puncts: ',', countSpaces: false }).countMode, 'nonSpace');
+  // countMode を直接渡したら、そちらが勝つ
+  assert.equal(C.extract('a, bcdef', { puncts: ',', countSpaces: true, countMode: 'alnum' }).countMode, 'alnum');
+});
+
+test('それらしさのスコアは、意味のある文を高く評価する', () => {
+  const good = C.likelihood('panelateastendofchapelslides');
+  const noise = C.likelihood('qzxjvkwqzxjvkwqzxjvkwqzxjvkw');
+  assert.ok(good.score > noise.score, `${good.score} vs ${noise.score}`);
+  assert.equal(good.lang, 'en');
+  const ja = C.likelihood('きょうはいいてんきですからさんぽします');
+  assert.equal(ja.lang, 'ja');
+  assert.ok(ja.score > C.likelihood('ヴヱヲヴヱヲヴヱヲ').score);
+  // 短すぎるものは0
+  assert.equal(C.likelihood('a').score, 0);
+  assert.equal(C.likelihood('').score, 0);
 });
