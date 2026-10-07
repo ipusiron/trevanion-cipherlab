@@ -1,4 +1,5 @@
 const Core = globalThis.TrevanionCore;
+const I18n = globalThis.TrevanionI18n;
 
 /* ==========================================================================
    UI Navigation - Tab Switching
@@ -1558,3 +1559,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* ==========================================================================
+   Language - 日本語と英語の切り替え
+   ========================================================================== */
+
+// HTML に書いた文言を、選ばれた言語で差し替える（?lang= → 保存した選択 → ブラウザーの言語）
+I18n.init();
+
+const langToggle = document.getElementById('lang-toggle');
+if (langToggle) {
+  langToggle.addEventListener('click', () => {
+    I18n.set(I18n.lang === 'ja' ? 'en' : 'ja');
+  });
+}

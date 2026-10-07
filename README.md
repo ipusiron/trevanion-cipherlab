@@ -289,12 +289,15 @@ trevanion-cipherlab/
 ├── script.js               # 画面側の処理（入力の読み取り・表示・タブ・生成）
 ├── style.css               # 配色とレイアウト（狭い画面への対応を含む）
 ├── js/                     # スクリプト
+│   ├── messages.js         # 画面の文言（日本語・英語で同じキーを持つ辞書）
+│   ├── i18n.js             # 言語の選択と、data-i18n を書いた要素の差し替え
 │   ├── trevanion-core.js   # 計算部（抽出・制約チェック・総当たり・分かち書き。DOMを使わない）
 │   └── trevanion-words.js  # 分かち書きに使う英単語の小さな辞書
 ├── test/                   # テスト（node --test で実行する）
 │   ├── load.js             # 画面と同じスクリプトの読み込みと、照合用の参照実装
 │   ├── core.test.js        # 計算部（逸話の手紙・3つの数え方・制約チェック・境界）
 │   ├── html.test.js        # index.html の静的な検査（CSP・id・aria・外部参照）
+│   ├── i18n.test.js        # 日英の辞書と画面の文言の対応
 │   ├── contrast.test.js    # 配色のコントラスト比と、狭い画面での折り返し
 │   ├── readme.test.js      # README と ENCRYPTION.md の記述を実装と突き合わせる
 │   └── format.test.js      # 1行に詰め込んでいないか、計算部がDOMを使っていないか

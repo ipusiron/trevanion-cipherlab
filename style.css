@@ -56,6 +56,7 @@ a:hover {
    ヘッダーセクション
    ========================================================================== */
 .app-header {
+  position: relative;
   padding: 32px 16px 20px;
   border-bottom: 1px solid var(--border);
   text-align: center;
@@ -75,6 +76,34 @@ a:hover {
   color: var(--muted);
   font-size: 15px;
   font-weight: 400;
+}
+
+/* 日本語と英語の切り替えボタン。広い画面ではヘッダーの右上、狭い画面では見出しの下に置く */
+.lang-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.lang-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .lang-toggle {
+    position: static;
+    margin-top: 12px;
+  }
 }
 
 /* ==========================================================================
