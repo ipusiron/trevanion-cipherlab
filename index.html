@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Trevanion CipherLab</title>
   <link rel="stylesheet" href="./style.css" />
@@ -14,14 +16,14 @@
 
   <main class="container">
     <nav class="tabs" role="tablist" aria-label="Main Tabs">
-      <button class="tab-btn active" data-tab="basic" role="tab" aria-selected="true">トレヴァニオン暗号の基本</button>
-      <button class="tab-btn" data-tab="encrypt" role="tab" aria-selected="false">暗号化（隠蔽化） - 未実装</button>
-      <button class="tab-btn" data-tab="decrypt" role="tab" aria-selected="false">復号（可視化）</button>
-      <button class="tab-btn" data-tab="study" role="tab" aria-selected="false">Null暗号の座学</button>
+      <button class="tab-btn active" id="tab-btn-basic" data-tab="basic" role="tab" aria-selected="true" aria-controls="basic" tabindex="0">トレヴァニオン暗号の基本</button>
+      <button class="tab-btn" id="tab-btn-encrypt" data-tab="encrypt" role="tab" aria-selected="false" aria-controls="encrypt" tabindex="-1">暗号化（隠蔽化）</button>
+      <button class="tab-btn" id="tab-btn-decrypt" data-tab="decrypt" role="tab" aria-selected="false" aria-controls="decrypt" tabindex="-1">復号（可視化）</button>
+      <button class="tab-btn" id="tab-btn-study" data-tab="study" role="tab" aria-selected="false" aria-controls="study" tabindex="-1">Null暗号の座学</button>
     </nav>
 
     <!-- 基本 -->
-    <section id="basic" class="tab-panel active" role="tabpanel" aria-label="基本">
+    <section id="basic" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-basic" tabindex="0">
       <h2>トレヴァニオン暗号の基本</h2>
 
       <details class="accordion" open>
@@ -45,24 +47,69 @@
       </details>
       
       <details class="accordion">
-        <summary>歴史的背景</summary>
+        <summary>伝えられている逸話</summary>
         <div class="accordion-content">
+          <p>この暗号には、次の逸話が伝えられています。</p>
           <p>
-            <strong>清教徒革命期</strong>、王党派の<strong>ジョン・トレヴァニオン卿</strong>は
-            コルチェスターの城に幽閉されました。友人R.T.から一通の手紙が届きました。
+            清教徒革命期、王党派のジョン・トレヴァニオンがコルチェスターの城に幽閉された。
+            そこへ、R.T.と署名された一通の手紙が届く。一見するとただの慰めの手紙だが、
+            句読点の直後から3文字目を順に拾うと
+            <em>"panel at east end of chapel slides"</em>（礼拝堂の東端の板が動く）という一文が現れる。
+            彼は祈りを装って礼拝堂に入り、そこから逃れた——。
           </p>
           <p>
             <em>"Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, ... Restinge your servant to command. R.T."</em>
           </p>
-          <p>これは一見普通の慰めの手紙に見えますが、Null暗号が仕込まれていたのです。</p>
           <p>
-            句読点の直後から3文字目を順に拾うと、<em>"panel at east end of chapel slides"</em>
-            （礼拝堂の東端のパネルがスライドする）という脱出の指示が現れ、
-            トレヴァニオンは祈りを装いながらこの隠し通路を発見し、脱出に成功しました。
+            ただし、<strong>この話は一次史料にたどり着けません。</strong>
+            下の「この逸話はどこまで確かめられるか」を開いてください。
+            本ツールは、この手紙を題材として扱っています。
           </p>
           <p>
-            後に<strong>コナン・ドイル</strong>の『グロリア・スコット号事件』でも
-            類似の暗号が登場し、この暗号方式が広く知られるようになりました。
+            コナン・ドイルの『グロリア・スコット号事件』にも隠し文の暗号が出てきますが、
+            そちらは最初の語から<strong>3語ごとに語を拾う</strong>方式で、句読点を手がかりにする本方式とは別のものです。
+          </p>
+        </div>
+      </details>
+
+      <details class="accordion">
+        <summary>この逸話はどこまで確かめられるか</summary>
+        <div class="accordion-content">
+          <p>暗号史でよく紹介される話ですが、たどれる範囲は次のとおりです。</p>
+          <ul>
+            <li>
+              <strong>いちばん古い記録は1853年の匿名の雑誌記事</strong>である
+              （無署名「Cyphers」『The National Miscellany』第1巻、ロンドン、1853年、356〜357頁）。
+              典拠は示されておらず、現在形の物語として書かれている。
+              同じ記事の書き手は、直後の別の暗号の話について「正確な事実を述べるつもりはない。知らないからだ」と断っている
+            </li>
+            <li>
+              <strong>そこから引き写されて広まった。</strong>
+              1863年の『Once a Week』→ 同年の『Harper's Weekly』→ 1868年のMyer『A Manual of Signals』
+              （Myer自身が「Harper's Weekly から取った」と明記している）→ 1869年のBaring-Gould →
+              1874年のBombaugh → Kahn『The Codebreakers』→ 現代。
+              <strong>この系譜のどの資料も、一次史料を挙げていない</strong>
+            </li>
+            <li>
+              <strong>同時代の史料と合わない。</strong>
+              クラレンドン伯『反乱史』が記すジョン・トレヴァニオンは、1643年7月のブリストル攻城戦で戦死した
+              28歳未満の下院議員で、ナイトではない。コルチェスターの降伏は1648年8月で5年ずれる。
+              降伏時に名簿から選ばれた3人（ルーカス、ライル、ガスコイン）のなかにも彼はいない。
+              城そのものも「1648年の攻城戦ではほとんど役割を果たさなかった」とされる
+            </li>
+            <li>
+              <strong>伝わるうちに年代が壊れた例もある。</strong>
+              1925年の雑誌記事は「ウィリアム・ピット首相の時代」と書いており、実際の1648年とは約135年離れている
+            </li>
+            <li>
+              研究者の評価としては、友清理士が「真正性は確立していないように見える」
+              「一次史料を引用する現代の著者はいないようだ」としつつ、
+              「暗号そのものは、ただの作り話にしては凝りすぎている」とも述べている
+            </li>
+          </ul>
+          <p class="note">
+            作り話だと決めつけられるわけでもありません。ここで言えるのは
+            「1853年より前にはさかのぼれず、同時代の史料とは合わない」というところまでです。
           </p>
         </div>
       </details>
@@ -78,13 +125,13 @@
     </section>
 
     <!-- 暗号化（隠蔽化） -->
-    <section id="encrypt" class="tab-panel" role="tabpanel" aria-label="暗号化（隠蔽化）">
+    <section id="encrypt" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-encrypt" tabindex="0">
       <h2>暗号化</h2>
 
       <!-- サブタブ -->
       <nav class="sub-tabs" role="tablist" aria-label="Encrypt Sub Tabs">
         <button class="sub-tab-btn active" data-subtab="generate-support" role="tab" aria-selected="true">生成支援</button>
-        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false">自動生成</button>
+        <button class="sub-tab-btn" data-subtab="auto-generate" role="tab" aria-selected="false">自動生成（実験的）</button>
       </nav>
 
       <!-- 生成支援サブタブ -->
@@ -134,6 +181,13 @@
 
       <!-- 自動生成サブタブ -->
       <div id="auto-generate" class="sub-tab-panel" role="tabpanel" aria-label="自動生成">
+
+        <div class="warn-box">
+          <strong>この機能は実験的です。</strong>
+          英語では、句読点の直後に置かれるのが接続詞のほうになるため、狙った文字が抽出位置にそろうのは偶然に頼っています。
+          日本語では規則は満たせますが、隠したい文字がそのまま見える形になりやすく、カバーテキストとしては不自然です。
+          確実に作るなら、「生成支援」タブで自分で書いて制約チェックにかけてください。
+        </div>
         <h3>自動生成</h3>
         <p class="note">
           平文を入力すると、トレヴァニオン暗号のカバーテキストを自動生成します。
@@ -182,7 +236,7 @@
             </div>
 
             <div class="perfect-search-controls">
-              <label for="target-perfect-count">目標完全一致数：<span class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数">❓</span></label>
+              <label for="target-perfect-count">目標完全一致数：<button type="button" class="help-icon" data-tooltip="平文のすべての文字が正しい位置に配置されたカバーテキストの数" aria-label="説明を表示">❓</button></label>
               <input type="number" id="target-perfect-count" value="2" min="1" max="10" />
 
               <label for="max-attempts">最大試行回数：</label>
@@ -190,12 +244,12 @@
 
               <div class="search-buttons">
                 <button id="start-perfect-search" class="primary">🎯 完全一致探索開始</button>
-                <button id="pause-perfect-search" class="secondary" style="display:none;">⏸️ 一時停止</button>
-                <button id="stop-perfect-search" class="secondary" style="display:none;">⏹️ 完全停止</button>
+                <button id="pause-perfect-search" class="secondary" hidden>⏸️ 一時停止</button>
+                <button id="stop-perfect-search" class="secondary" hidden>⏹️ 完全停止</button>
               </div>
             </div>
 
-            <div id="search-progress" class="search-progress" style="display:none;">
+            <div id="search-progress" class="search-progress" hidden>
               <div class="progress-header">
                 <h4>🔍 探索中...</h4>
                 <div class="progress-stats">
@@ -212,7 +266,7 @@
           </div>
         </details>
 
-        <div id="auto-results" class="auto-results" style="display:none;">
+        <div id="auto-results" class="auto-results" hidden>
           <h4>生成結果</h4>
           <div class="generation-info">
             <span id="auto-info" class="generation-stats"></span>
@@ -221,7 +275,7 @@
           <div id="auto-candidates" class="candidates-list"></div>
         </div>
 
-        <div class="note" style="margin-top: 20px;">
+        <div class="note note-spaced">
           <strong>機能説明：</strong>
           <ul>
             <li>英語単語データベースに基づいて自動生成</li>
@@ -234,7 +288,7 @@
     </section>
 
     <!-- 復号（可視化） -->
-    <section id="decrypt" class="tab-panel" role="tabpanel" aria-label="復号（可視化）">
+    <section id="decrypt" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-decrypt" tabindex="0">
       <h2>復号（可視化）</h2>
 
       <div class="controls">
@@ -267,7 +321,7 @@
     </section>
 
     <!-- 座学 -->
-    <section id="study" class="tab-panel" role="tabpanel" aria-label="座学">
+    <section id="study" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-study" tabindex="0">
       <h2>Null暗号の座学</h2>
 
       <details class="accordion" open>
@@ -275,9 +329,18 @@
         <div class="accordion-content">
           <p>
             <strong>Null暗号（Null cipher）</strong> とは、自然文に見えるテキストから、
-            あらかじめ決められた規則で文字を抜き出すことで真のメッセージを得る暗号方式です。<br>
-            日本語では <strong>冗字暗号</strong> や <strong>冗字サイファー</strong> とも呼ばれます。<br>
-            一見して普通の文章に見えるため、暗号文だと気づかれにくく、検閲回避などに利用されました。
+            あらかじめ決められた規則で文字を抜き出すことで真のメッセージを得る方式です。
+            意味を持たない部分を「冗字（null）」と呼びます。
+            一見して普通の文章に見えるため、暗号文だと気づかれにくく、検閲を避ける目的で使われました。
+          </p>
+          <p>
+            この考え方は古く、ジョン・ウィルキンズ『Mercury, or the Secret and Swift Messenger』（1641年）の第8章が、
+            章題そのもので「意図した意味に必要な数より多くの文字を使って秘密に書くこと」と定義しています。
+            同じ章には、各行の頭文字を拾うアクロスティックや、カルダングリルも並べられています。
+          </p>
+          <p class="note">
+            日本語では「冗字暗号」と呼ばれることがありますが、調べた範囲ではこの語の用例をほとんど見つけられませんでした。
+            日本語の暗号史では、長田順行『暗号大全』の分類で言う<strong>分置式</strong>がこの系統にあたります。
           </p>
         </div>
       </details>
@@ -330,6 +393,11 @@
             <li>一定間隔や特定位置に意味のある文字列が現れる。</li>
           </ul>
           <p>→ こうした特徴がある文章はNull暗号文の可能性がある。</p>
+          <p class="note">
+            米国の検閲局が1946年にまとめた報告は、隠しメッセージを含む手紙について
+            「文面が本物らしく響かない。自然さを欠き、人がある考えに置くはずの強調が抜け落ちている」と書いています
+            （Friedman &amp; Callimahos『Military Cryptanalytics Part I』par.83 に引用）。
+          </p>
         </div>
       </details>
 
@@ -338,8 +406,17 @@
         <div class="accordion-content">
           <ul>
             <li>古くからスパイや囚人の密書で利用され、検閲を欺くために活用された。</li>
+            <li>
+              第二次世界大戦中、米国の郵便検閲は<strong>国際チェスの対局</strong>のようなやりとりも止めねばならなかったと、
+              検閲局の報告（1945年、22頁）に記されている。隠す媒体としては、ほかに地図・楽譜・買い物リスト・株価などが挙げられている
+              （Friedman &amp; Callimahos, par.83）
+            </li>
+            <li>
+              暗号（cryptography）が内容を守るのに対し、ステガノグラフィーは<strong>存在そのものを隠す</strong>ものだと整理される
+              （Petitcolas ほか「Information Hiding — A Survey」1999年）
+            </li>
             <li>現代では「隠しメッセージ」「ステガノグラフィー」の原型として扱われ、教育や歴史研究で取り上げられている。</li>
-            <li>Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
+            <li>Null暗号は分置式暗号の一種である。Day036の<a href="https://ipusiron.github.io/hidden-message-challenge/" target="_blank" rel="noopener noreferrer">Hidden Message Challenge</a>で分置式暗号を体験できる（位置抽出チャレンジがNull暗号に相当）。</li>
           </ul>
         </div>
       </details>
@@ -348,8 +425,8 @@
 
   <footer>
     <div class="footer">
-      🔗 GitHubリポジトリはこちら（
-      <a href="https://github.com/ipusiron/trevanion-cipherlab" target="_blank" rel="noopener">ipusiron/trevanion-cipherlab</a>
+      🔗 GitHubリポジトリーはこちら（
+      <a href="https://github.com/ipusiron/trevanion-cipherlab" target="_blank" rel="noopener noreferrer">ipusiron/trevanion-cipherlab</a>
       ）
     </div>
   </footer>
@@ -357,6 +434,7 @@
   <!-- トースト通知 -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
+  <script src="./js/trevanion-core.js"></script>
   <script src="./script.js"></script>
 </body>
 </html>

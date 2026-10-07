@@ -1,3 +1,5 @@
+const Core = globalThis.TrevanionCore;
+
 /* ==========================================================================
    UI Navigation - Tab Switching
    ========================================================================== */
@@ -10,21 +12,36 @@
 const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = document.querySelectorAll('.tab-panel');
 
+const tabList = [...tabBtns];
+
+function activateTab(btn) {
+  tabBtns.forEach(b => {
+    b.classList.remove('active');
+    b.setAttribute('aria-selected', 'false');
+    b.tabIndex = -1;
+  });
+  panels.forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+  btn.tabIndex = 0;
+  document.getElementById(btn.dataset.tab).classList.add('active');
+}
+
 tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    // 全てのタブボタンを非アクティブに
-    tabBtns.forEach(b => {
-      b.classList.remove('active');
-      b.setAttribute('aria-selected', 'false');
-    });
+  btn.addEventListener('click', () => activateTab(btn));
 
-    // 全てのパネルを非表示に
-    panels.forEach(p => p.classList.remove('active'));
-
-    // クリックされたタブとそのパネルをアクティブに
-    btn.classList.add('active');
-    btn.setAttribute('aria-selected', 'true');
-    document.getElementById(btn.dataset.tab).classList.add('active');
+  // 矢印キー・Home・End でも移動できるようにする（role="tab" の作法）
+  btn.addEventListener('keydown', (ev) => {
+    const i = tabList.indexOf(btn);
+    let next = -1;
+    if (ev.key === 'ArrowRight') next = (i + 1) % tabList.length;
+    if (ev.key === 'ArrowLeft') next = (i - 1 + tabList.length) % tabList.length;
+    if (ev.key === 'Home') next = 0;
+    if (ev.key === 'End') next = tabList.length - 1;
+    if (next < 0) return;
+    ev.preventDefault();
+    activateTab(tabList[next]);
+    tabList[next].focus();
   });
 });
 
@@ -67,7 +84,7 @@ subTabBtns.forEach(btn => {
  * @returns {string} - 重複を除いた句読点文字列
  */
 function normalizePuncts(str) {
-  return Array.from(new Set((str || '').split(''))).join('');
+  return Core.normalizePuncts(str);
 }
 
 /**
@@ -76,7 +93,7 @@ function normalizePuncts(str) {
  * @returns {boolean} - 空白文字の場合true
  */
 function isSpace(ch) {
-  return /\s/.test(ch);
+  return Core.isSpace(ch);
 }
 
 /**
@@ -131,8 +148,7 @@ function updateProcessingText(elementId, plaintext) {
  * @returns {boolean} - 日本語文字が含まれている場合true
  */
 function containsJapanese(text) {
-  // ひらがな、カタカナ、漢字の範囲
-  return /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/.test(text);
+  return Core.containsJapanese(text);
 }
 
 /**
@@ -161,49 +177,8 @@ function extractJapaneseText(plaintext) {
  * @param {boolean} countSpaces - 空白文字をカウントに含めるかどうか
  * @returns {{message:string, indices:number[]}} 抽出されたメッセージと位置情報
  */
-function trevanionExtract(text, puncts = ",.;:!?'、。", offset = 3, countSpaces = true) {
-  const res = [];           // 抽出された文字の配列
-  const indices = [];       // 抽出位置のインデックス配列
-  const pset = new Set((puncts || '').split(''));  // 句読点セットを Set に変換
-
-  // テキストを1文字ずつ走査
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-
-    // 句読点を発見した場合
-    if (pset.has(ch)) {
-      let steps = 0;           // オフセットカウンター
-      let foundTarget = false; // 目標文字を見つけたかフラグ
-
-      // 句読点の直後から文字をカウント
-      for (let j = i + 1; j < text.length; j++) {
-        const c = text[j];
-
-        // 次の句読点に遭遇したら、オフセット文字に達していない場合はスキップ
-        if (pset.has(c)) {
-          break;
-        }
-
-        // 空白をカウントするかどうかに応じて処理
-        if (countSpaces || !isSpace(c)) {
-          steps++;
-
-          // 指定されたオフセットに到達した場合
-          if (steps === offset) {
-            res.push(c);           // 文字を結果に追加
-            indices.push(j);       // 位置を記録
-            foundTarget = true;
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  return {
-    message: res.join(''),  // 抽出された文字を連結した文字列
-    indices                 // 抽出位置の配列
-  };
+function trevanionExtract(text, puncts = Core.DEFAULT_PUNCTS, offset = Core.DEFAULT_OFFSET, countSpaces = false) {
+  return Core.extract(text, { puncts, offset, countSpaces, mode: Core.DEFAULT_MODE });
 }
 
 /**
@@ -291,7 +266,6 @@ function clearOldSettings() {
   localStorage.removeItem('tcl_puncts');
   localStorage.removeItem('tcl_offset');
   localStorage.removeItem('tcl_countspaces');
-  console.log('Cleared old LocalStorage settings');
   location.reload();
 }
 
@@ -304,10 +278,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   const apostrophe = String.fromCharCode(39); // ASCII apostrophe
   const defaultPuncts = "、。,.!?;:" + apostrophe;
 
-  console.log('Default puncts:', defaultPuncts);
-  console.log('Default puncts length:', defaultPuncts.length);
-  console.log('Last char code:', defaultPuncts.charCodeAt(defaultPuncts.length - 1));
-  console.log('Apostrophe char:', apostrophe);
 
   try{
     const p = localStorage.getItem('tcl_puncts');
@@ -316,19 +286,11 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
     // 句読点セットを設定（アポストロフィーが含まれていない古い設定を更新）
     let finalPuncts = p || defaultPuncts;
-    if(p && !p.includes(apostrophe)) {
-      finalPuncts = p + apostrophe;
-      localStorage.setItem('tcl_puncts', finalPuncts);
-      console.log('Updated old puncts to include apostrophe');
-    }
     decPuncts.value = finalPuncts;
 
-    console.log('Actual decPuncts value:', decPuncts.value);
-    console.log('Actual decPuncts length:', decPuncts.value.length);
 
     // 文字ごとに確認
     for(let i = 0; i < decPuncts.value.length; i++) {
-      console.log(`Character ${i}: '${decPuncts.value[i]}' (code: ${decPuncts.value.charCodeAt(i)})`);
     }
 
     if(o) decOffset.value = o;
@@ -346,7 +308,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
       finalEncPuncts = encP + apostrophe;
     }
     encPunctsInput.value = finalEncPuncts;
-    console.log('Actual encPunctsInput value:', encPunctsInput.value);
   }
 
   // 自動生成タブの句読点セットも同様に設定
@@ -358,7 +319,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
       finalAutoPuncts = autoP + apostrophe;
     }
     autoPunctsInput.value = finalAutoPuncts;
-    console.log('Actual autoPunctsInput value:', autoPunctsInput.value);
   }
 });
 
@@ -446,65 +406,9 @@ const encPreview = document.getElementById('enc-preview');       // プレビュ
  * @returns {Object} 制約チェック結果の詳細情報
  */
 function checkConstraints(plaintext, covertext, puncts, offset, countSpaces) {
-  // 平文から空白を除去して文字配列に変換
-  const expectedChars = Array.from(plaintext.replace(/\s+/g, ''));
-
-  // カバーテキストから実際に抽出される文字列を取得
-  const extraction = trevanionExtract(covertext, puncts, offset, countSpaces);
-  const actualChars = Array.from(extraction.message);
-
-  // 結果オブジェクトの初期化
-  const result = {
-    isValid: false,                    // 全体的な検証結果
-    expectedLength: expectedChars.length,  // 期待される文字数
-    actualLength: actualChars.length,      // 実際に抽出された文字数
-    matches: 0,                        // 一致した文字数
-    details: [],                       // 詳細な比較結果
-    mismatches: [],
-    missing: [],
-    extra: []
-  };
-
-  // 各文字を比較
-  const maxLength = Math.max(expectedChars.length, actualChars.length);
-  for (let i = 0; i < maxLength; i++) {
-    const expected = expectedChars[i] || null;
-    const actual = actualChars[i] || null;
-    const punctIndex = extraction.indices[i] || null;
-
-    const detail = {
-      index: i,
-      expected,
-      actual,
-      punctIndex,
-      status: 'unknown'
-    };
-
-    if (expected && actual) {
-      if (expected.toLowerCase() === actual.toLowerCase()) {
-        detail.status = 'match';
-        result.matches++;
-      } else {
-        detail.status = 'mismatch';
-        result.mismatches.push({index: i, expected, actual});
-      }
-    } else if (expected && !actual) {
-      detail.status = 'missing';
-      result.missing.push({index: i, expected});
-    } else if (!expected && actual) {
-      detail.status = 'extra';
-      result.extra.push({index: i, actual});
-    }
-
-    result.details.push(detail);
-  }
-
-  result.isValid = result.matches === expectedChars.length &&
-                   result.mismatches.length === 0 &&
-                   result.missing.length === 0 &&
-                   result.extra.length === 0;
-
-  return result;
+  return Core.checkConstraints(plaintext, covertext, {
+    puncts, offset, countSpaces, mode: Core.DEFAULT_MODE
+  });
 }
 
 /**
@@ -520,7 +424,7 @@ function generateConstraintReport(result, covertext, puncts) {
     html += '<ul class="issue-list">';
 
     if (result.missing.length > 0) {
-      html += `<li class="missing">不足: ${result.missing.length}文字 (${result.missing.map(m => `"${m.expected}"`).join(', ')})</li>`;
+      html += `<li class="missing">不足: ${result.missing.length}文字 (${result.missing.map(m => `"${escapeHtml(m.expected)}"`).join(', ')})</li>`;
     }
     if (result.mismatches.length > 0) {
       html += `<li class="mismatch">不一致: ${result.mismatches.length}箇所</li>`;
@@ -551,8 +455,8 @@ function generateConstraintReport(result, covertext, puncts) {
 
       html += `<tr class="row-${statusClass}">`;
       html += `<td>${i + 1}</td>`;
-      html += `<td class="expected">${detail.expected || '-'}</td>`;
-      html += `<td class="actual">${detail.actual || '-'}</td>`;
+      html += `<td class="expected">${escapeHtml(detail.expected || '-')}</td>`;
+      html += `<td class="actual">${escapeHtml(detail.actual || '-')}</td>`;
       html += `<td class="status-${statusClass}">${statusText}</td>`;
       html += '</tr>';
     });
@@ -817,23 +721,23 @@ function findWordsForChar(char, offset, excludeUsed = [], posIndex = positionInd
 /**
  * 複数の戦略で単語を検索（フォールバック機能付き）
  */
-function findWordsWithFallback(char, offset, excludeUsed = []) {
-  let words = findWordsForChar(char, offset, excludeUsed);
+function findWordsWithFallback(char, offset, excludeUsed = [], wordDatabase = allWords, posIndex = positionIndex) {
+  let words = findWordsForChar(char, offset, excludeUsed, posIndex);
 
   // 戦略1: 完全一致が見つからない場合、近い位置を探す
   if (words.length === 0) {
     for (let deltaPos of [1, -1, 2, -2]) {
       const newOffset = offset + deltaPos;
       if (newOffset >= 1 && newOffset <= 10) {
-        words = findWordsForChar(char, newOffset, excludeUsed);
+        words = findWordsForChar(char, newOffset, excludeUsed, posIndex);
         if (words.length > 0) break;
       }
     }
   }
 
-  // 戦略2: それでも見つからない場合、文字を含む任意の単語を探す
+  // 戦略2: それでも見つからない場合、同じ語彙のなかで文字を含む語を探す
   if (words.length === 0) {
-    words = allWords.filter(word =>
+    words = wordDatabase.filter(word =>
       word.toLowerCase().includes(char.toLowerCase()) &&
       !excludeUsed.includes(word)
     );
@@ -880,9 +784,9 @@ function generateTrevanionText(plaintext, offset = 3, style = 'formal') {
     let words = findWordsWithFallback(char, offset, usedWords, isJapanese ? japaneseWords : allWords, isJapanese ? japanesePositionIndex : positionIndex);
 
     if (words.length === 0) {
-      // 最終フォールバック: 制御された文字挿入
-      const padding = generatePadding(offset - 1);
-      result += `、${padding}${char}`;
+      // 最終フォールバック: 言語に合う句読点で区切り、目標の文字をオフセットの位置に置く
+      const padding = generatePadding(offset - 1, isJapanese);
+      result += `${isJapanese ? '、' : ', '}${padding}${char}`;
     } else {
       // 最適な単語を選択
       const selectedWord = selectBestWord(words, char, offset);
@@ -898,9 +802,9 @@ function generateTrevanionText(plaintext, offset = 3, style = 'formal') {
     }
   }
 
-  // 終了フレーズ
+  // 終了フレーズ（言語に合わせる）
   const ending = elements.enders[Math.floor(Math.random() * elements.enders.length)];
-  result += `. Yours ${ending}.`;
+  result += isJapanese ? `。${ending}。` : `. Yours ${ending}.`;
 
   return result;
 }
@@ -908,20 +812,24 @@ function generateTrevanionText(plaintext, offset = 3, style = 'formal') {
 /**
  * パディング文字列生成
  */
-function generatePadding(length) {
-  const fillers = ['my', 'oh', 'ah', 'or', 'so', 'to', 'by', 'in', 'of', 'at'];
+function generatePadding(length, isJapanese = false) {
+  // 末尾に空白を付けない（「空白も数える」設定のとき、目標の文字の位置がずれるため）
+  const fillers = isJapanese
+    ? ['あの', 'その', 'いま', 'また', 'もう', 'ただ', 'やや', 'なお']
+    : ['my', 'oh', 'ah', 'or', 'so', 'to', 'by', 'in', 'of', 'at'];
+  const filler = isJapanese ? 'ん' : 'a';
   let padding = '';
 
   while (padding.length < length) {
-    const filler = fillers[Math.floor(Math.random() * fillers.length)];
-    if (padding.length + filler.length <= length) {
-      padding += filler;
+    const piece = fillers[Math.floor(Math.random() * fillers.length)];
+    if (padding.length + piece.length <= length) {
+      padding += piece;
     } else {
-      padding += 'a'.repeat(length - padding.length);
+      padding += filler.repeat(length - padding.length);
     }
   }
 
-  return padding + ' ';
+  return padding;
 }
 
 /**
@@ -980,12 +888,12 @@ function addTextEnhancement(elements, shouldAdd) {
 /**
  * 品質評価付き候補生成
  */
-function generateQualityCandidates(plaintext, puncts, offset, countSpaces, targetCount = 7) {
+function generateQualityCandidates(plaintext, puncts, offset, countSpaces, targetCount = 7, style = 'formal') {
   const candidates = [];
   const maxAttempts = targetCount * 3; // 品質フィルタリングのため多めに生成
 
   for (let i = 0; i < maxAttempts && candidates.length < targetCount; i++) {
-    const candidate = generateTrevanionText(plaintext, offset);
+    const candidate = generateTrevanionText(plaintext, offset, style);
 
     // 品質チェック
     const quality = evaluateTextQuality(candidate, plaintext, puncts, offset, countSpaces);
@@ -1074,7 +982,7 @@ function renderCandidates(candidates, plaintext, puncts, offset, countSpaces) {
           <button class="copy-candidate" data-candidate="${index}">📋 コピー</button>
         </div>
         <div class="candidate-text">${escapeHtml(candidate)}</div>
-        <div class="candidate-preview">${renderHighlight(candidate, trevanionExtract(candidate, puncts, offset, false).indices, puncts)}</div>
+        <div class="candidate-preview">${renderHighlight(candidate, trevanionExtract(candidate, puncts, offset, countSpaces).indices, puncts)}</div>
       </div>
     `;
   });
@@ -1111,7 +1019,7 @@ autoGenerateBtn?.addEventListener('click', () => {
   const style = document.getElementById('auto-style')?.value || 'formal';
 
   if (!plaintext) {
-    autoResults.style.display = 'none';
+    autoResults.hidden = true;
     showToast('平文を入力してください');
     return;
   }
@@ -1155,17 +1063,17 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
     // UI更新
     const avgQuality = currentCandidates.length > 0 ?
       currentCandidates.reduce((sum, candidate) => {
-        const quality = evaluateTextQuality(candidate, plaintext, puncts, offset);
+        const quality = evaluateTextQuality(candidate, plaintext, puncts, offset, countSpaces);
         return sum + quality.score;
       }, 0) / currentCandidates.length : 0;
 
     autoInfo.innerHTML = `
       ${currentCandidates.length}個の候補を生成<br>
-      <small>平文: "${plaintext}" | オフセット: ${offset} | 平均品質: ${(avgQuality * 100).toFixed(1)}%</small>
+      <small>平文: "${escapeHtml(plaintext)}" | オフセット: ${offset} | 平均品質: ${(avgQuality * 100).toFixed(1)}%</small>
     `;
 
     autoCandidates.innerHTML = renderCandidates(currentCandidates, plaintext, puncts, offset, countSpaces);
-    autoResults.style.display = 'block';
+    autoResults.hidden = false;
 
     // 候補のコピーボタンイベント
     document.querySelectorAll('.copy-candidate').forEach(btn => {
@@ -1181,7 +1089,7 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
 
     // 完全一致候補の数をカウント
     const perfectMatches = currentCandidates.filter(candidate => {
-      const quality = evaluateTextQuality(candidate, plaintext, puncts, offset);
+      const quality = evaluateTextQuality(candidate, plaintext, puncts, offset, countSpaces);
       return quality.isValid;
     }).length;
 
@@ -1204,7 +1112,7 @@ function generateAndDisplayCandidates(plaintext, puncts, offset, countSpaces, st
     console.error('Generation error:', error);
     autoInfo.textContent = 'エラーが発生しました';
     autoCandidates.innerHTML = '<p class="error">生成中にエラーが発生しました。</p>';
-    autoResults.style.display = 'block';
+    autoResults.hidden = false;
     showToast('❌ 生成に失敗しました');
   }
 }
@@ -1285,10 +1193,10 @@ startSearchBtn?.addEventListener('click', async () => {
   };
 
   // UI状態の更新
-  startSearchBtn.style.display = 'none';
-  pauseSearchBtn.style.display = 'inline-block';
-  stopSearchBtn.style.display = 'inline-block';
-  searchProgress.style.display = 'block';
+  startSearchBtn.hidden = true;
+  pauseSearchBtn.hidden = false;
+  stopSearchBtn.hidden = false;
+  searchProgress.hidden = false;
 
   // 進捗バーの初期化
   progressBar.style.width = '0%';
@@ -1318,7 +1226,7 @@ startSearchBtn?.addEventListener('click', async () => {
  */
 pauseSearchBtn?.addEventListener('click', () => {
   searchState.shouldStop = true;
-  showToast('⏸️ 探索を一時停止しています...');
+  showToast('⏹️ 探索を打ち切ります…');
 });
 
 /**
@@ -1440,9 +1348,9 @@ function stopSearch() {
   }
 
   // UI状態のリセット
-  startSearchBtn.style.display = 'inline-block';
-  pauseSearchBtn.style.display = 'none';
-  stopSearchBtn.style.display = 'none';
+  startSearchBtn.hidden = false;
+  pauseSearchBtn.hidden = true;
+  stopSearchBtn.hidden = true;
 
   // タイマーのクリア
   if (searchState.timeInterval) {
@@ -1458,13 +1366,13 @@ function resetSearchUI() {
   // 進捗表示エリアを非表示
   const searchProgress = document.getElementById('search-progress');
   if (searchProgress) {
-    searchProgress.style.display = 'none';
+    searchProgress.hidden = true;
   }
 
   // ボタン状態をリセット
-  if (startSearchBtn) startSearchBtn.style.display = 'inline-block';
-  if (pauseSearchBtn) pauseSearchBtn.style.display = 'none';
-  if (stopSearchBtn) stopSearchBtn.style.display = 'none';
+  if (startSearchBtn) startSearchBtn.hidden = false;
+  if (pauseSearchBtn) pauseSearchBtn.hidden = true;
+  if (stopSearchBtn) stopSearchBtn.hidden = true;
 
   // 進捗バーをリセット
   if (progressBar) {
@@ -1498,11 +1406,11 @@ function displayPerfectSearchResults(perfectMatches, plaintext, puncts, offset, 
   // UI更新
   autoInfo.innerHTML = `
     🎯 完全一致探索結果: ${perfectMatches.length}個の完全一致候補<br>
-    <small>試行回数: ${searchState.attempts.toLocaleString()} | 平文: "${plaintext}" | 句読点: "${puncts}" | オフセット: ${offset}</small>
+    <small>試行回数: ${searchState.attempts.toLocaleString()} | 平文: "${escapeHtml(plaintext)}" | 句読点: "${escapeHtml(puncts)}" | オフセット: ${offset}</small>
   `;
 
   autoCandidates.innerHTML = renderCandidates(perfectMatches, plaintext, puncts, offset, countSpaces);
-  autoResults.style.display = 'block';
+  autoResults.hidden = false;
 
   // コピーボタンイベントの設定
   document.querySelectorAll('.copy-candidate').forEach(btn => {
