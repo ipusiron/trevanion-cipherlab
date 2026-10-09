@@ -185,3 +185,28 @@ for (const file of ['README.md', 'ENCRYPTION.md', 'index.html']) {
     }
   });
 }
+
+const TREVANION_LETTER = [
+    "Worthie Sir John, Hope, that is ye beste comfort of ye afflicted, cannot much, I fear me, help you now. That I",
+    "would saye to you, is this only: if ever I may be able to requite that I do owe you, stand not upon asking me.",
+    "'Tis not much that I can do: but what I can do, bee ye verie sure I wille. I knowe that, if dethe comes, if",
+    "ordinary men fear it, it frights not you, accounting it for a high honour, to have such a rewarde of your",
+    "loyalty. Pray yet that you may be spared this soe bitter, cup. I fear not that you will grudge any sufferings;",
+    "only if bie submission you can turn them away, 'tis the part of a wise man. Tell me, an if you can, to do for",
+    "you anythinge that you wolde have done. The general goes back on Wednesday. Restinge your servant to command.",
+    "R.T."
+  ].join(' ');
+test('ユースケースの「このツールならではの使い方」の抽出とスコアは計算部と同じ（日英）', () => {
+  const ja = readme;
+  const en = readmeEn;
+  const hidden = C.extract(TREVANION_LETTER, { offset: 3 }).message;
+  assert.equal(hidden, 'panelateastendofchapelslides');
+  assert.ok(ja.includes('panelateastendofchapelslides') && en.includes('panelateastendofchapelslides'));
+  const score = (off) => C.likelihood(C.extract(TREVANION_LETTER, { offset: off }).message).score;
+  assert.deepEqual([score(2), score(3), score(4)], [0.3778, 0.6741, 0.2923]);
+  assert.ok(score(3) > score(2) && score(3) > score(4));
+  assert.ok(ja.includes('0.3778・0.6741・0.2923') && en.includes('0.3778, 0.6741 and 0.2923'));
+  const withSpaces = C.extract(TREVANION_LETTER, { offset: 3, countMode: 'all' }).message;
+  assert.equal(withSpaces, 'oha ehsftsue fftcoru nsenohe');
+  assert.ok(ja.includes('oha ehsftsue fftcoru nsenohe') && en.includes('oha ehsftsue fftcoru nsenohe'));
+});

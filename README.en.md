@@ -194,6 +194,12 @@ With n = 1 the character right after the mark is read; with n = -1, the characte
 
 ## 🎯 Use cases
 
+### Ways of using this tool in particular
+
+- Confirming that the hidden message appears only to those who know the rule (steganography classes): paste the Trevanion letter and pick the third letter after each punctuation mark, and panelateastendofchapelslides appears. Add spaces and it reads "panel at east end of chapel slides". Without the rule it looks like nothing but a devout private letter and draws none of the suspicion a ciphertext would. You can confirm, on the original of the anecdote, a steganography that only someone who knows where to look can read
+- Telling signal from noise across offsets (analysis and search classes): on the same letter, change the position you pick from the 2nd to the 3rd to the 4th letter and compare the English-likelihood scores, which come out as 0.3778, 0.6741 and 0.2923; only the correct 3rd letter is clearly high. The other offsets are just strings of letters with low scores. You can confirm the idea of search, picking out the one meaningful candidate from many by a score
+- Confirming that changing how you count changes the letters picked (measurement and data-processing classes): with the same letter and the same 3rd position, switching to "count spaces too" shifts the letters picked to oha ehsftsue fftcoru nsenohe, and no meaningful sentence appears. It shows that the same input gives a different result from nothing but a difference in the rule of what counts as one character
+
 ### Learning about security
 
 - See how a null cipher works, on the letter from the anecdote itself
